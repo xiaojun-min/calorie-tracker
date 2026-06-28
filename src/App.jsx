@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import FoodInput from "./components/FoodInput";
 import FoodCard from "./components/FoodCard";
 import FoodHistory from "./components/FoodHistory";
@@ -15,6 +15,13 @@ function getTime() {
   return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+function serializeArg(arg) {
+  if (typeof arg === "string") return arg;
+  if (arg instanceof Error) return `${arg.name}: ${arg.message}`;
+  try { return JSON.stringify(arg); }
+  catch { return String(arg); }
+}
+
 export default function App() {
   const [tab, setTab] = useState("home");
   const [entries, setEntries] = useState(() => {
@@ -23,6 +30,30 @@ export default function App() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [logs, setLogs] = useState([]);
+  const origConsole = useRef({});
+
+  // Intercept console.log / console.error to capture messages on-screen
+  useEffect(() => {
+    const origLog = console.log.bind(console);
+    const origError = console.error.bind(console);
+    origConsole.current = { log: origLog, error: origError };
+
+    const capture = (level) => (...args) => {
+      origConsole.current[level](...args);
+      const msg = args.map(serializeArg).join(" ");
+      const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      setLogs((prev) => [...prev, { level, msg, time }]);
+    };
+
+    console.log = capture("log");
+    console.error = capture("error");
+
+    return () => {
+      console.log = origLog;
+      console.error = origError;
+    };
+  }, []);
 
   // Auto-populate API key from Vercel env var on first run
   useEffect(() => {
@@ -67,6 +98,7 @@ export default function App() {
       };
       setEntries((prev) => [newEntry, ...prev]);
     } catch (err) {
+      console.error("[App] analyzeFood error:", err);
       setError(err.message || "Could not analyze food. Please try again.");
     } finally {
       setLoading(false);
@@ -118,6 +150,24 @@ export default function App() {
       {tab === "settings" && (
         <main className="main-content">
           <Settings />
+          <div className="debug-panel">
+            <div className="debug-header">
+              <span className="debug-title">🪲 Debug Log</span>
+              <button className="debug-clear-btn" onClick={() => setLogs([])}>Clear</button>
+            </div>
+            {logs.length === 0 ? (
+              <p className="debug-empty">No logs yet. Try uploading a photo.</p>
+            ) : (
+              <div className="debug-log-list">
+                {logs.map((entry, i) => (
+                  <div key={i} className={`debug-log-entry ${entry.level}`}>
+                    <span className="debug-time">{entry.time}</span>
+                    <span className="debug-msg">{entry.msg}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </main>
       )}
 
