@@ -44,6 +44,69 @@
   border: 1.5px solid var(--border);
 }
 
+/* ───── Meal Label Row ───── */
+.meal-label-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.meal-label-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  transition: all 0.18s ease;
+}
+
+.meal-label-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* ───── Portion Selector ───── */
+.portion-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.portion-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.portion-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.portion-btn {
+  flex: 1;
+  padding: 9px 4px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  transition: all 0.18s ease;
+}
+
+.portion-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
 .mode-toggle {
   display: flex;
   gap: 8px;
@@ -258,6 +321,22 @@
   color: var(--text-muted);
 }
 
+.food-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meal-label-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: white;
+  letter-spacing: 0.02em;
+}
+
 .delete-btn {
   width: 40px;
   height: 40px;
@@ -319,6 +398,10 @@
 .nutrition-item:nth-child(2) .nutrition-value { color: var(--protein-color); }
 .nutrition-item:nth-child(3) .nutrition-value { color: var(--carbs-color); }
 .nutrition-item:nth-child(4) .nutrition-value { color: var(--fat-color); }
+.nutrition-item:nth-child(5) .nutrition-value { color: #7CB342; }
+.nutrition-item:nth-child(6) .nutrition-value { color: #E91E63; }
+.nutrition-item:nth-child(7) .nutrition-value { color: #8E24AA; }
+.nutrition-item:nth-child(8) .nutrition-value { color: #795548; }
 
 /* ───── Daily Total ───── */
 .daily-total {
@@ -357,6 +440,39 @@
 }
 
 .total-item.calories .nutrition-value { color: #FFB347 !important; }
+
+/* ───── Goal Progress Bar ───── */
+.goal-progress-wrapper {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.goal-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.75);
+  font-weight: 600;
+}
+
+.goal-progress-bar-track {
+  height: 10px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.goal-progress-bar-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--success);
+  transition: width 0.4s ease;
+}
+
+.goal-progress-bar-fill.warn { background: #FF9800; }
+.goal-progress-bar-fill.over { background: var(--danger); }
 
 /* ───── Bottom Nav ───── */
 .bottom-nav {
@@ -487,6 +603,101 @@
   font-size: 0.95rem;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(255, 107, 71, 0.3);
+}
+
+/* ───── Profile Section ───── */
+.profile-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-field-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.profile-input,
+.profile-select {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+.profile-input:focus,
+.profile-select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.gender-btns {
+  display: flex;
+  gap: 6px;
+  height: 42px;
+}
+
+.gender-btn {
+  flex: 1;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  transition: all 0.18s;
+}
+
+.gender-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.goal-result {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  color: white;
+}
+
+.goal-result-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+
+.goal-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.goal-number-unit {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.goal-result-sub {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 6px;
 }
 
 .settings-hint {

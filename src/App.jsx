@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import FoodInput from "./components/FoodInput";
 import FoodCard from "./components/FoodCard";
 import FoodHistory from "./components/FoodHistory";
 import DailyTotal from "./components/DailyTotal";
 import Settings from "./components/Settings";
 import { analyzeFood } from "./api/claude";
+import { calculateCalorieGoal } from "./utils/tdee";
 import "./App.css";
 
 function getToday() {
@@ -31,6 +32,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [logs, setLogs] = useState([]);
+  const [profileVersion, setProfileVersion] = useState(0);
   const origConsole = useRef({});
 
   // Intercept console.log / console.error to capture messages on-screen
@@ -55,7 +57,7 @@ export default function App() {
     };
   }, []);
 
-  // Auto-populate API key from Vercel env var on first run
+  // Auto-populate API key from env var on first run
   useEffect(() => {
     const envKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
     if (envKey && !localStorage.getItem("anthropic_api_key")) {
@@ -69,7 +71,15 @@ export default function App() {
     catch { /* storage quota exceeded */ }
   }, [entries]);
 
-  const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail }) => {
+  // Derive calorie goal from saved profile; refreshes when profile is saved
+  const calorieGoal = useMemo(() => {
+    try {
+      const profile = JSON.parse(localStorage.getItem("user_profile") || "{}");
+      return calculateCalorieGoal(profile)?.goal || 0;
+    } catch { return 0; }
+  }, [profileVersion]);
+
+  const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail, portion = 1, mealLabel = "Snack" }) => {
     const apiKey = localStorage.getItem("anthropic_api_key") || "";
     if (!description?.trim() && !imageBase64) {
       setError("Please describe your food or upload a photo.");
@@ -79,16 +89,22 @@ export default function App() {
     setLoading(true);
     try {
       const result = await analyzeFood({ description, imageBase64, imageMimeType, apiKey });
+      const scale = (v) => Math.round((v || 0) * portion);
       const newEntry = {
         id: Date.now(),
         date: getToday(),
+        time: getTime(),
+        mealLabel,
         name: result.name,
         emoji: result.emoji || "🍽️",
-        calories: Math.round(result.calories || 0),
-        protein: Math.round(result.protein || 0),
-        carbs: Math.round(result.carbs || 0),
-        fat: Math.round(result.fat || 0),
-        time: getTime(),
+        calories: scale(result.calories),
+        protein: scale(result.protein),
+        carbs: scale(result.carbs),
+        fat: scale(result.fat),
+        fiber: scale(result.fiber),
+        sugar: scale(result.sugar),
+        sodium: scale(result.sodium),
+        saturated_fat: scale(result.saturated_fat),
         imagePreview: imageThumbnail || null,
       };
       setEntries((prev) => [newEntry, ...prev]);
@@ -130,7 +146,7 @@ export default function App() {
                   <FoodCard key={entry.id} entry={entry} onDelete={handleDelete} />
                 ))}
               </div>
-              <DailyTotal entries={todayEntries} />
+              <DailyTotal entries={todayEntries} calorieGoal={calorieGoal} />
             </>
           )}
         </main>
@@ -144,7 +160,7 @@ export default function App() {
 
       {tab === "settings" && (
         <main className="main-content">
-          <Settings />
+          <Settings onProfileSaved={() => setProfileVersion((v) => v + 1)} />
           <div className="debug-panel">
             <div className="debug-header">
               <span className="debug-title">🪲 Debug Log</span>
@@ -178,7 +194,7 @@ export default function App() {
           className={`nav-btn ${tab === "history" ? "active" : ""}`}
           onClick={() => { setTab("history"); setError(""); }}
         >
-          <span className="nav-icon">📸</span>
+          <span className="nav-icon">📅</span>
           <span className="nav-label">History</span>
         </button>
         <button

@@ -5,7 +5,12 @@ export default function FoodCard({ entry, onDelete }) {
         <span className="food-emoji">{entry.emoji}</span>
         <div className="food-name-time">
           <span className="food-name">{entry.name}</span>
-          <span className="food-time">{entry.time}</span>
+          <div className="food-card-meta">
+            <span className="food-time">{entry.time}</span>
+            {entry.mealLabel && (
+              <span className="meal-label-badge">{entry.mealLabel}</span>
+            )}
+          </div>
         </div>
         <button
           className="delete-btn"
@@ -17,11 +22,7 @@ export default function FoodCard({ entry, onDelete }) {
       </div>
 
       {entry.imagePreview && (
-        <img
-          src={entry.imagePreview}
-          alt={entry.name}
-          className="food-card-image"
-        />
+        <img src={entry.imagePreview} alt={entry.name} className="food-card-image" />
       )}
 
       <div className="nutrition-grid">
@@ -40,6 +41,22 @@ export default function FoodCard({ entry, onDelete }) {
         <div className="nutrition-item">
           <span className="nutrition-value">{entry.fat}g</span>
           <span className="nutrition-label">Fat</span>
+        </div>
+        <div className="nutrition-item">
+          <span className="nutrition-value">{entry.fiber ?? 0}g</span>
+          <span className="nutrition-label">Fiber</span>
+        </div>
+        <div className="nutrition-item">
+          <span className="nutrition-value">{entry.sugar ?? 0}g</span>
+          <span className="nutrition-label">Sugar</span>
+        </div>
+        <div className="nutrition-item">
+          <span className="nutrition-value">{entry.sodium ?? 0}</span>
+          <span className="nutrition-label">Sodium mg</span>
+        </div>
+        <div className="nutrition-item">
+          <span className="nutrition-value">{entry.saturated_fat ?? 0}g</span>
+          <span className="nutrition-label">Sat.Fat</span>
         </div>
       </div>
     </div>

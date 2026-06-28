@@ -53,7 +53,6 @@ async function fileToJpegBase64(file) {
   const mime = dataUrl.split(",")[0].match(/:(.*?);/)?.[1] || "unknown";
   console.log("[Upload] Detected MIME type:", mime);
 
-  // iOS can display HEIC in <img> but cannot draw it to canvas — give actionable message
   if (mime === "image/heic" || mime === "image/heif") {
     throw new Error(
       "HEIC format not supported. On your iPhone go to:\nSettings → Camera → Formats → Most Compatible\nThen retake the photo."
@@ -80,7 +79,6 @@ async function fileToJpegBase64(file) {
   try {
     ctx.drawImage(img, 0, 0, w, h);
   } catch (drawErr) {
-    // Safari throws bare TypeError here for HEIC and some other formats
     console.error("[Upload] drawImage failed:", drawErr);
     throw new Error(
       `Canvas drawImage failed for ${mime} (${img.width}×${img.height}). ` +
@@ -95,12 +93,30 @@ async function fileToJpegBase64(file) {
   return { b64, preview: out };
 }
 
+const MEAL_LABELS = ["Breakfast", "Lunch", "Dinner", "Snack"];
+const PORTIONS = [
+  { label: "1/4", value: 0.25 },
+  { label: "1/2", value: 0.5 },
+  { label: "3/4", value: 0.75 },
+  { label: "Whole", value: 1 },
+];
+
+function defaultMealLabel() {
+  const h = new Date().getHours();
+  if (h < 10) return "Breakfast";
+  if (h < 14) return "Lunch";
+  if (h < 18) return "Dinner";
+  return "Snack";
+}
+
 export default function FoodInput({ onAdd, loading }) {
   const [mode, setMode] = useState("text");
   const [description, setDescription] = useState("");
   const [imageBase64, setImageBase64] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [photoError, setPhotoError] = useState("");
+  const [mealLabel, setMealLabel] = useState(() => defaultMealLabel());
+  const [portion, setPortion] = useState(1);
   const fileRef = useRef(null);
 
   async function handleFile(e) {
@@ -127,11 +143,15 @@ export default function FoodInput({ onAdd, loading }) {
       imageBase64,
       imageMimeType: imageBase64 ? "image/jpeg" : null,
       imageThumbnail: imagePreview,
+      portion,
+      mealLabel,
     });
     setDescription("");
     setImageBase64(null);
     setImagePreview(null);
     setPhotoError("");
+    setPortion(1);
+    setMealLabel(defaultMealLabel());
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -146,6 +166,21 @@ export default function FoodInput({ onAdd, loading }) {
 
   return (
     <div className="food-input-card">
+      {/* Meal label */}
+      <div className="meal-label-row">
+        {MEAL_LABELS.map((label) => (
+          <button
+            key={label}
+            type="button"
+            className={`meal-label-btn ${mealLabel === label ? "active" : ""}`}
+            onClick={() => setMealLabel(label)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Text / Photo toggle */}
       <div className="mode-toggle">
         <button
           type="button"
@@ -204,6 +239,25 @@ export default function FoodInput({ onAdd, loading }) {
               onChange={handleFile}
               style={{ display: "none" }}
             />
+          </div>
+        )}
+
+        {/* Portion selector — shown once there's content to submit */}
+        {canSubmit && (
+          <div className="portion-selector">
+            <span className="portion-label">Portion eaten</span>
+            <div className="portion-btns">
+              {PORTIONS.map((p) => (
+                <button
+                  key={p.value}
+                  type="button"
+                  className={`portion-btn ${portion === p.value ? "active" : ""}`}
+                  onClick={() => setPortion(p.value)}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

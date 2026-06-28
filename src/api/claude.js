@@ -27,7 +27,11 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
   "calories": <number>,
   "protein": <number in grams>,
   "carbs": <number in grams>,
-  "fat": <number in grams>
+  "fat": <number in grams>,
+  "fiber": <number in grams>,
+  "sugar": <number in grams>,
+  "sodium": <number in milligrams>,
+  "saturated_fat": <number in grams>
 }`,
   });
 
