@@ -12,9 +12,16 @@ function readFileAsDataUrl(file) {
 async function fileToJpegBase64(file) {
   const MAX = 1200;
 
+  console.log("[Upload] File selected:", {
+    name: file.name,
+    type: file.type || "(no type)",
+    sizeMB: (file.size / 1024 / 1024).toFixed(2),
+  });
+
   // Attempt 1: createImageBitmap → canvas (decodes HEIC internally on iOS 15+)
   if (typeof createImageBitmap === "function") {
     try {
+      console.log("[Upload] Attempt 1: createImageBitmap...");
       const bitmap = await createImageBitmap(file);
       const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height, 1));
       const w = Math.max(1, Math.round(bitmap.width * scale));
@@ -28,16 +35,23 @@ async function fileToJpegBase64(file) {
       bitmap.close?.();
       const out = canvas.toDataURL("image/jpeg", 0.85);
       const b64 = out.split(",")[1];
-      if (b64) return { b64, preview: out };
+      if (b64) {
+        console.log("[Upload] Attempt 1 OK:", { w, h, base64Chars: b64.length });
+        return { b64, preview: out };
+      }
       throw new Error("toDataURL produced empty output");
     } catch (err) {
-      console.warn("[attempt1 createImageBitmap]", err.message || String(err));
+      console.warn("[Upload] Attempt 1 failed:", err.message || String(err));
     }
+  } else {
+    console.log("[Upload] createImageBitmap not available, skipping attempt 1");
   }
 
   // Attempt 2: FileReader → Image element → canvas
+  console.log("[Upload] Attempt 2: FileReader → Image → canvas...");
   const dataUrl = await readFileAsDataUrl(file);
   const mime = dataUrl.split(",")[0].match(/:(.*?);/)?.[1] || "unknown";
+  console.log("[Upload] Detected MIME type:", mime);
 
   // iOS can display HEIC in <img> but cannot draw it to canvas — give actionable message
   if (mime === "image/heic" || mime === "image/heif") {
@@ -52,6 +66,7 @@ async function fileToJpegBase64(file) {
     el.onload = () => resolve(el);
     el.src = dataUrl;
   });
+  console.log("[Upload] Image loaded:", { width: img.width, height: img.height });
 
   const scale = Math.min(1, MAX / Math.max(img.width, img.height, 1));
   const w = Math.max(1, Math.round(img.width * scale));
@@ -66,6 +81,7 @@ async function fileToJpegBase64(file) {
     ctx.drawImage(img, 0, 0, w, h);
   } catch (drawErr) {
     // Safari throws bare TypeError here for HEIC and some other formats
+    console.error("[Upload] drawImage failed:", drawErr);
     throw new Error(
       `Canvas drawImage failed for ${mime} (${img.width}×${img.height}). ` +
       "On iPhone: Settings → Camera → Formats → Most Compatible"
@@ -75,6 +91,7 @@ async function fileToJpegBase64(file) {
   const out = canvas.toDataURL("image/jpeg", 0.85);
   const b64 = out.split(",")[1];
   if (!b64) throw new Error("toDataURL produced empty output (attempt 2)");
+  console.log("[Upload] Attempt 2 OK:", { w, h, base64Chars: b64.length });
   return { b64, preview: out };
 }
 
@@ -92,10 +109,12 @@ export default function FoodInput({ onAdd, loading }) {
     setPhotoError("");
     try {
       const { b64, preview } = await fileToJpegBase64(file);
+      console.log("[Upload] Done — image ready for analysis");
       setImageBase64(b64);
       setImagePreview(preview);
     } catch (err) {
       const msg = err?.message || String(err) || "Unknown error";
+      console.error("[Upload] Failed:", msg);
       setPhotoError(msg);
       if (fileRef.current) fileRef.current.value = "";
     }
