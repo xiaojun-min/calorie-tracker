@@ -33,6 +33,7 @@ export default function FoodHistory({ entries, onDelete }) {
 
   return (
     <div className="history-list">
+      <p className="history-device-note">📱 History is saved on this device only. Entries logged on another browser won&apos;t appear here.</p>
       {sortedDates.map((date) => {
         const dayEntries = grouped[date];
         const total = dayEntries.reduce((s, e) => s + (e.calories || 0), 0);

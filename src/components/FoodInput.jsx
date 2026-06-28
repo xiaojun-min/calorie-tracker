@@ -77,8 +77,8 @@ export default function FoodInput({ onAdd, loading }) {
       setImageBase64(b64);
       setImagePreview(preview);
     } catch (err) {
-      setPhotoError("Could not process photo — try a different image.");
-      console.error("Photo error:", err);
+      const msg = err?.message || String(err) || "Unknown error";
+      setPhotoError(`Photo error: ${msg}`);
       if (fileRef.current) fileRef.current.value = "";
     }
   }
