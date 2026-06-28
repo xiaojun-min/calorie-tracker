@@ -149,6 +149,13 @@
   border: 1px solid #FFCDD2;
 }
 
+.img-error {
+  font-size: 0.85rem;
+  color: var(--danger);
+  text-align: center;
+  padding: 4px 0;
+}
+
 /* Analyze button */
 .analyze-btn {
   width: 100%;
