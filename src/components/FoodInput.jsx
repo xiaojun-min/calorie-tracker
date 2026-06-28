@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 async function resizeThumbnail(dataUrl, maxWidth = 600) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
       const ratio = Math.min(1, maxWidth / img.width);
@@ -11,6 +11,7 @@ async function resizeThumbnail(dataUrl, maxWidth = 600) {
       canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
       resolve(canvas.toDataURL("image/jpeg", 0.75));
     };
+    img.onerror = () => reject(new Error("Could not load image"));
     img.src = dataUrl;
   });
 }
@@ -21,20 +22,32 @@ export default function FoodInput({ onAdd, loading }) {
   const [imageBase64, setImageBase64] = useState(null);
   const [imageMimeType, setImageMimeType] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [photoError, setPhotoError] = useState("");
   const fileRef = useRef(null);
 
   async function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setPhotoError("");
     const reader = new FileReader();
     reader.onload = async (ev) => {
-      const dataUrl = ev.target.result;
-      const [header, b64] = dataUrl.split(",");
-      const mime = header.match(/:(.*?);/)?.[1] || "image/jpeg";
-      setImageBase64(b64);
-      setImageMimeType(mime);
-      const thumb = await resizeThumbnail(dataUrl);
-      setImagePreview(thumb);
+      try {
+        const dataUrl = ev.target.result;
+        // Resize before storing — phone photos can be 5–12 MB which exceeds API limits
+        const resized = await resizeThumbnail(dataUrl);
+        const [header, b64] = resized.split(",");
+        const mime = header.match(/:(.*?);/)?.[1] || "image/jpeg";
+        setImageBase64(b64);
+        setImageMimeType(mime);
+        setImagePreview(resized);
+      } catch {
+        setPhotoError("Could not process image. Please try a different photo.");
+        if (fileRef.current) fileRef.current.value = "";
+      }
+    };
+    reader.onerror = () => {
+      setPhotoError("Could not read image. Please try again.");
+      if (fileRef.current) fileRef.current.value = "";
     };
     reader.readAsDataURL(file);
   }
@@ -46,6 +59,7 @@ export default function FoodInput({ onAdd, loading }) {
     setImageBase64(null);
     setImageMimeType(null);
     setImagePreview(null);
+    setPhotoError("");
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -53,6 +67,7 @@ export default function FoodInput({ onAdd, loading }) {
     setImageBase64(null);
     setImageMimeType(null);
     setImagePreview(null);
+    setPhotoError("");
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -114,6 +129,7 @@ export default function FoodInput({ onAdd, loading }) {
                 <span>Choose photo or take one</span>
               </button>
             )}
+            {photoError && <p className="photo-error">{photoError}</p>}
             <input
               ref={fileRef}
               type="file"
