@@ -4,7 +4,7 @@ function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => resolve(e.target.result);
-    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.onerror = () => reject(new Error("FileReader failed"));
     reader.readAsDataURL(file);
   });
 }
@@ -12,7 +12,7 @@ function readFileAsDataUrl(file) {
 async function fileToJpegBase64(file) {
   const MAX = 1200;
 
-  // Primary: createImageBitmap (iOS 15+, handles HEIC natively, no callback nesting)
+  // Attempt 1: createImageBitmap → canvas (decodes HEIC internally on iOS 15+)
   if (typeof createImageBitmap === "function") {
     try {
       const bitmap = await createImageBitmap(file);
@@ -23,24 +23,32 @@ async function fileToJpegBase64(file) {
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext("2d");
-      if (!ctx) throw new Error("No canvas context");
+      if (!ctx) throw new Error("getContext returned null");
       ctx.drawImage(bitmap, 0, 0, w, h);
-      if (bitmap.close) bitmap.close();
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-      const b64 = dataUrl.split(",")[1];
-      if (b64) return { b64, preview: dataUrl };
-      throw new Error("Canvas produced empty output");
+      bitmap.close?.();
+      const out = canvas.toDataURL("image/jpeg", 0.85);
+      const b64 = out.split(",")[1];
+      if (b64) return { b64, preview: out };
+      throw new Error("toDataURL produced empty output");
     } catch (err) {
-      console.warn("createImageBitmap failed, trying fallback:", err.message);
+      console.warn("[attempt1 createImageBitmap]", err.message || String(err));
     }
   }
 
-  // Fallback: FileReader → Image element → canvas
+  // Attempt 2: FileReader → Image element → canvas
   const dataUrl = await readFileAsDataUrl(file);
+  const mime = dataUrl.split(",")[0].match(/:(.*?);/)?.[1] || "unknown";
+
+  // iOS can display HEIC in <img> but cannot draw it to canvas — give actionable message
+  if (mime === "image/heic" || mime === "image/heif") {
+    throw new Error(
+      "HEIC format not supported. On your iPhone go to:\nSettings → Camera → Formats → Most Compatible\nThen retake the photo."
+    );
+  }
 
   const img = await new Promise((resolve, reject) => {
     const el = new Image();
-    el.onerror = () => reject(new Error("Image failed to load"));
+    el.onerror = () => reject(new Error(`Image element failed to load (type: ${mime})`));
     el.onload = () => resolve(el);
     el.src = dataUrl;
   });
@@ -52,12 +60,22 @@ async function fileToJpegBase64(file) {
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("No canvas context");
-  ctx.drawImage(img, 0, 0, w, h);
-  const result = canvas.toDataURL("image/jpeg", 0.85);
-  const b64 = result.split(",")[1];
-  if (!b64) throw new Error("Canvas produced empty output");
-  return { b64, preview: result };
+  if (!ctx) throw new Error("getContext returned null (attempt 2)");
+
+  try {
+    ctx.drawImage(img, 0, 0, w, h);
+  } catch (drawErr) {
+    // Safari throws bare TypeError here for HEIC and some other formats
+    throw new Error(
+      `Canvas drawImage failed for ${mime} (${img.width}×${img.height}). ` +
+      "On iPhone: Settings → Camera → Formats → Most Compatible"
+    );
+  }
+
+  const out = canvas.toDataURL("image/jpeg", 0.85);
+  const b64 = out.split(",")[1];
+  if (!b64) throw new Error("toDataURL produced empty output (attempt 2)");
+  return { b64, preview: out };
 }
 
 export default function FoodInput({ onAdd, loading }) {
@@ -78,7 +96,7 @@ export default function FoodInput({ onAdd, loading }) {
       setImagePreview(preview);
     } catch (err) {
       const msg = err?.message || String(err) || "Unknown error";
-      setPhotoError(`Photo error: ${msg}`);
+      setPhotoError(msg);
       if (fileRef.current) fileRef.current.value = "";
     }
   }

@@ -156,6 +156,15 @@
   padding: 4px 0;
 }
 
+.photo-error {
+  font-size: 0.82rem;
+  color: var(--danger);
+  text-align: center;
+  padding: 4px 0;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
 /* Analyze button */
 .analyze-btn {
   width: 100%;
