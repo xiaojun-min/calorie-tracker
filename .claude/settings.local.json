@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(claude-api)",
+      "Bash(npm create *)",
+      "Bash(npx create-vite@5 . --template react --yes)",
+      "Bash(npm install *)"
+    ]
+  }
+}

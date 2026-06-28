@@ -1,0 +1,53 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary: #FF6B47;
+  --primary-light: #FF8C70;
+  --primary-dark: #E5542E;
+  --bg: #FFF8F5;
+  --card-bg: #FFFFFF;
+  --border: #FFE0D5;
+  --text: #2D1F1A;
+  --text-muted: #9B7B72;
+  --success: #4CAF50;
+  --danger: #E53935;
+  --cal-color: #FF6B47;
+  --protein-color: #4CAF50;
+  --carbs-color: #2196F3;
+  --fat-color: #FF9800;
+  --shadow: 0 2px 12px rgba(255, 107, 71, 0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+    "Noto Sans TC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+textarea, input {
+  font-family: inherit;
+  font-size: 1rem;
+}

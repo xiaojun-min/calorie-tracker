@@ -1,0 +1,486 @@
+/* ───── App Shell ───── */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+}
+
+/* ───── Header ───── */
+.app-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  padding: 20px 20px 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(255, 107, 71, 0.3);
+}
+
+.app-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+/* ───── Main ───── */
+.main-content {
+  flex: 1;
+  padding: 16px 16px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ───── Food Input Card ───── */
+.food-input-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.mode-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  transition: all 0.18s ease;
+}
+
+.mode-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.food-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  resize: none;
+  transition: border-color 0.15s;
+}
+
+.food-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Photo area */
+.photo-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.upload-btn {
+  width: 100%;
+  padding: 28px 16px;
+  border-radius: var(--radius-sm);
+  border: 2px dashed var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.18s;
+}
+
+.upload-btn:active {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.upload-icon {
+  font-size: 2rem;
+}
+
+.photo-preview-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.photo-preview {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.remove-photo-btn {
+  margin-top: 8px;
+  width: 100%;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  background: #FFF0EE;
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid #FFCDD2;
+}
+
+/* Analyze button */
+.analyze-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(255, 107, 71, 0.35);
+  transition: all 0.18s;
+}
+
+.analyze-btn:not(:disabled):active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 6px rgba(255, 107, 71, 0.25);
+}
+
+/* ───── Error Banner ───── */
+.error-banner {
+  background: #FFF0EE;
+  border: 1.5px solid #FFCDD2;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--danger);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ───── Empty State ───── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-emoji {
+  font-size: 3.5rem;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* ───── Food Card ───── */
+.food-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+}
+
+.food-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.food-emoji {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.food-name-time {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.food-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.food-time {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.delete-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #FFF0EE;
+  color: var(--danger);
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.delete-btn:active {
+  background: #FFCDD2;
+}
+
+.food-card-image {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+
+/* ───── Nutrition Grid ───── */
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.nutrition-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px 6px 8px;
+  gap: 3px;
+}
+
+.nutrition-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.nutrition-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-align: center;
+}
+
+.nutrition-item.calories .nutrition-value { color: var(--cal-color); }
+.nutrition-item:nth-child(2) .nutrition-value { color: var(--protein-color); }
+.nutrition-item:nth-child(3) .nutrition-value { color: var(--carbs-color); }
+.nutrition-item:nth-child(4) .nutrition-value { color: var(--fat-color); }
+
+/* ───── Daily Total ───── */
+.daily-total {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.daily-total-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.total-grid {
+  gap: 10px;
+}
+
+.total-item {
+  background: rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px 6px 10px;
+}
+
+.total-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: white !important;
+}
+
+.total-item .nutrition-label {
+  color: rgba(255,255,255,0.65);
+}
+
+.total-item.calories .nutrition-value { color: #FFB347 !important; }
+
+/* ───── Bottom Nav ───── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  background: white;
+  border-top: 1.5px solid var(--border);
+  box-shadow: 0 -4px 16px rgba(255, 107, 71, 0.1);
+  z-index: 100;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px 8px 12px;
+  background: transparent;
+  color: var(--text-muted);
+  transition: color 0.15s;
+  min-height: 60px;
+}
+
+.nav-btn.active {
+  color: var(--primary);
+}
+
+.nav-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.nav-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ───── Settings ───── */
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.settings-section {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.settings-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.lang-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.lang-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  transition: all 0.18s;
+}
+
+.lang-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.api-key-input {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color 0.15s;
+}
+
+.api-key-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.save-key-btn {
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(255, 107, 71, 0.3);
+}
+
+.settings-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.entries-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
