@@ -31,46 +31,29 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
 }`,
   });
 
-  const body = JSON.stringify({
-    model: "claude-sonnet-4-6",
-    max_tokens: 256,
-    messages: [{ role: "user", content }],
-  });
-
-  console.log("[API] About to fetch:", {
+  console.log("[API] Calling proxy:", {
     hasImage: !!imageBase64,
-    imageMimeType,
     base64Chars: imageBase64?.length,
-    bodyBytes: body.length,
-    apiKeyPrefix: apiKey ? apiKey.slice(0, 10) + "..." : "(empty)",
+    hasDescription: !!description,
   });
 
   let response;
   try {
-    response = await fetch("https://api.anthropic.com/v1/messages", {
+    response = await fetch("/api/analyze", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content, apiKey }),
     });
   } catch (networkErr) {
-    console.error("[API] fetch() threw — network/CORS error:", {
-      name: networkErr.name,
-      message: networkErr.message,
-      stack: networkErr.stack,
-    });
-    throw new Error(`Network error (${networkErr.name}: ${networkErr.message}). Check internet connection and that Safari is not blocking cross-site requests.`);
+    console.error("[API] fetch /api/analyze threw:", networkErr.name, networkErr.message);
+    throw new Error(`Network error: ${networkErr.message}`);
   }
 
-  console.log("[API] Response received:", { status: response.status, ok: response.ok });
+  console.log("[API] Proxy response:", response.status);
 
   if (!response.ok) {
     const errBody = await response.json().catch(() => ({}));
-    console.error("[API] Non-OK response:", { status: response.status, body: errBody });
+    console.error("[API] Error body:", errBody);
     throw new Error(`API error ${response.status}: ${errBody?.error?.message || response.statusText}`);
   }
 
@@ -87,7 +70,7 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
   try {
     return JSON.parse(jsonMatch[0]);
   } catch (parseErr) {
-    console.error("[API] JSON.parse failed:", parseErr.message, jsonMatch[0]);
+    console.error("[API] JSON.parse failed:", parseErr.message);
     throw new Error(`Invalid JSON in response: ${parseErr.message}`);
   }
 }
