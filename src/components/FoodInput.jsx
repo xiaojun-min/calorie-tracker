@@ -1,32 +1,69 @@
 import { useState, useRef } from "react";
 
-async function resizeThumbnail(dataUrl, maxWidth = 1024) {
+function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onerror = () => reject(new Error("Could not load image"));
-    img.onload = () => {
-      try {
-        const ratio = Math.min(1, maxWidth / img.width);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * ratio);
-        canvas.height = Math.round(img.height * ratio);
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Canvas context unavailable");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
-      } catch (err) {
-        reject(err);
-      }
-    };
-    img.src = dataUrl;
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.readAsDataURL(file);
   });
+}
+
+async function fileToJpegBase64(file) {
+  const MAX = 1200;
+
+  // Primary: createImageBitmap (iOS 15+, handles HEIC natively, no callback nesting)
+  if (typeof createImageBitmap === "function") {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height, 1));
+      const w = Math.max(1, Math.round(bitmap.width * scale));
+      const h = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("No canvas context");
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      if (bitmap.close) bitmap.close();
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      const b64 = dataUrl.split(",")[1];
+      if (b64) return { b64, preview: dataUrl };
+      throw new Error("Canvas produced empty output");
+    } catch (err) {
+      console.warn("createImageBitmap failed, trying fallback:", err.message);
+    }
+  }
+
+  // Fallback: FileReader → Image element → canvas
+  const dataUrl = await readFileAsDataUrl(file);
+
+  const img = await new Promise((resolve, reject) => {
+    const el = new Image();
+    el.onerror = () => reject(new Error("Image failed to load"));
+    el.onload = () => resolve(el);
+    el.src = dataUrl;
+  });
+
+  const scale = Math.min(1, MAX / Math.max(img.width, img.height, 1));
+  const w = Math.max(1, Math.round(img.width * scale));
+  const h = Math.max(1, Math.round(img.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("No canvas context");
+  ctx.drawImage(img, 0, 0, w, h);
+  const result = canvas.toDataURL("image/jpeg", 0.85);
+  const b64 = result.split(",")[1];
+  if (!b64) throw new Error("Canvas produced empty output");
+  return { b64, preview: result };
 }
 
 export default function FoodInput({ onAdd, loading }) {
   const [mode, setMode] = useState("text");
   const [description, setDescription] = useState("");
   const [imageBase64, setImageBase64] = useState(null);
-  const [imageMimeType, setImageMimeType] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [photoError, setPhotoError] = useState("");
   const fileRef = useRef(null);
@@ -35,35 +72,27 @@ export default function FoodInput({ onAdd, loading }) {
     const file = e.target.files?.[0];
     if (!file) return;
     setPhotoError("");
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      try {
-        const dataUrl = ev.target.result;
-        // Resize before storing — phone photos can be 5–12 MB which exceeds API limits
-        const resized = await resizeThumbnail(dataUrl);
-        const [header, b64] = resized.split(",");
-        const mime = header.match(/:(.*?);/)?.[1] || "image/jpeg";
-        setImageBase64(b64);
-        setImageMimeType(mime);
-        setImagePreview(resized);
-      } catch {
-        setPhotoError("Could not process image. Please try a different photo.");
-        if (fileRef.current) fileRef.current.value = "";
-      }
-    };
-    reader.onerror = () => {
-      setPhotoError("Could not read image. Please try again.");
+    try {
+      const { b64, preview } = await fileToJpegBase64(file);
+      setImageBase64(b64);
+      setImagePreview(preview);
+    } catch (err) {
+      setPhotoError("Could not process photo — try a different image.");
+      console.error("Photo error:", err);
       if (fileRef.current) fileRef.current.value = "";
-    };
-    reader.readAsDataURL(file);
+    }
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    onAdd({ description, imageBase64, imageMimeType, imageThumbnail: imagePreview });
+    onAdd({
+      description,
+      imageBase64,
+      imageMimeType: imageBase64 ? "image/jpeg" : null,
+      imageThumbnail: imagePreview,
+    });
     setDescription("");
     setImageBase64(null);
-    setImageMimeType(null);
     setImagePreview(null);
     setPhotoError("");
     if (fileRef.current) fileRef.current.value = "";
@@ -71,7 +100,6 @@ export default function FoodInput({ onAdd, loading }) {
 
   function removePhoto() {
     setImageBase64(null);
-    setImageMimeType(null);
     setImagePreview(null);
     setPhotoError("");
     if (fileRef.current) fileRef.current.value = "";
@@ -117,11 +145,7 @@ export default function FoodInput({ onAdd, loading }) {
                   className="photo-preview"
                   onClick={() => fileRef.current?.click()}
                 />
-                <button
-                  type="button"
-                  className="remove-photo-btn"
-                  onClick={removePhoto}
-                >
+                <button type="button" className="remove-photo-btn" onClick={removePhoto}>
                   ✕ Remove
                 </button>
               </div>
@@ -146,11 +170,7 @@ export default function FoodInput({ onAdd, loading }) {
           </div>
         )}
 
-        <button
-          type="submit"
-          className="analyze-btn"
-          disabled={!canSubmit || loading}
-        >
+        <button type="submit" className="analyze-btn" disabled={!canSubmit || loading}>
           {loading ? "⏳ Analyzing..." : "✨ Analyze"}
         </button>
       </form>
