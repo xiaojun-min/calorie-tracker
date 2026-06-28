@@ -23,7 +23,8 @@ export default function Settings() {
       <div className="settings-section">
         <label className="settings-label">Anthropic API Key</label>
         <p className="settings-desc">
-          Enter your Anthropic API key to enable food analysis. It&apos;s saved only to this browser.
+          Optional — only needed if no key is configured on the server. Leave blank if your
+          deployment has <code>ANTHROPIC_API_KEY</code> set in Vercel environment variables.
         </p>
         <input
           className="api-key-input"

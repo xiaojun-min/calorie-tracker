@@ -71,11 +71,6 @@ export default function App() {
 
   const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail }) => {
     const apiKey = localStorage.getItem("anthropic_api_key") || "";
-    if (!apiKey) {
-      setError("Please set your Anthropic API key in Settings first.");
-      setTab("settings");
-      return;
-    }
     if (!description?.trim() && !imageBase64) {
       setError("Please describe your food or upload a photo.");
       return;
