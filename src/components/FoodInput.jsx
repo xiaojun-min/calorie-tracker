@@ -1,6 +1,21 @@
 import { useState, useRef } from "react";
 
-export default function FoodInput({ onAdd, t, loading }) {
+async function resizeThumbnail(dataUrl, maxWidth = 600) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, maxWidth / img.width);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.75));
+    };
+    img.src = dataUrl;
+  });
+}
+
+export default function FoodInput({ onAdd, loading }) {
   const [mode, setMode] = useState("text");
   const [description, setDescription] = useState("");
   const [imageBase64, setImageBase64] = useState(null);
@@ -8,24 +23,25 @@ export default function FoodInput({ onAdd, t, loading }) {
   const [imagePreview, setImagePreview] = useState(null);
   const fileRef = useRef(null);
 
-  function handleFile(e) {
+  async function handleFile(e) {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const dataUrl = ev.target.result;
       const [header, b64] = dataUrl.split(",");
       const mime = header.match(/:(.*?);/)?.[1] || "image/jpeg";
       setImageBase64(b64);
       setImageMimeType(mime);
-      setImagePreview(dataUrl);
+      const thumb = await resizeThumbnail(dataUrl);
+      setImagePreview(thumb);
     };
     reader.readAsDataURL(file);
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    onAdd({ description, imageBase64, imageMimeType });
+    onAdd({ description, imageBase64, imageMimeType, imageThumbnail: imagePreview });
     setDescription("");
     setImageBase64(null);
     setImageMimeType(null);
@@ -50,14 +66,14 @@ export default function FoodInput({ onAdd, t, loading }) {
           className={`mode-btn ${mode === "text" ? "active" : ""}`}
           onClick={() => setMode("text")}
         >
-          ✏️ {t.typeFood}
+          ✏️ Type food
         </button>
         <button
           type="button"
           className={`mode-btn ${mode === "photo" ? "active" : ""}`}
           onClick={() => setMode("photo")}
         >
-          📷 {t.uploadPhoto}
+          📷 Photo
         </button>
       </div>
 
@@ -65,7 +81,7 @@ export default function FoodInput({ onAdd, t, loading }) {
         {mode === "text" ? (
           <textarea
             className="food-textarea"
-            placeholder={t.descriptionPlaceholder}
+            placeholder="e.g. 2 scrambled eggs with toast"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
@@ -85,7 +101,7 @@ export default function FoodInput({ onAdd, t, loading }) {
                   className="remove-photo-btn"
                   onClick={removePhoto}
                 >
-                  ✕ {t.removePhoto}
+                  ✕ Remove
                 </button>
               </div>
             ) : (
@@ -95,14 +111,13 @@ export default function FoodInput({ onAdd, t, loading }) {
                 onClick={() => fileRef.current?.click()}
               >
                 <span className="upload-icon">📸</span>
-                <span>{t.uploadPhoto}</span>
+                <span>Choose photo or take one</span>
               </button>
             )}
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
-              capture="environment"
               onChange={handleFile}
               style={{ display: "none" }}
             />
@@ -114,7 +129,7 @@ export default function FoodInput({ onAdd, t, loading }) {
           className="analyze-btn"
           disabled={!canSubmit || loading}
         >
-          {loading ? `⏳ ${t.analyzing}` : `✨ ${t.analyze}`}
+          {loading ? "⏳ Analyzing..." : "✨ Analyze"}
         </button>
       </form>
     </div>

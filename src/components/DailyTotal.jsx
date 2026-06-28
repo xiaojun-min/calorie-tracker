@@ -1,4 +1,4 @@
-export default function DailyTotal({ entries, t }) {
+export default function DailyTotal({ entries }) {
   const total = entries.reduce(
     (acc, e) => ({
       calories: acc.calories + (e.calories || 0),
@@ -11,23 +11,23 @@ export default function DailyTotal({ entries, t }) {
 
   return (
     <div className="daily-total">
-      <h2 className="daily-total-title">📊 {t.dailyTotal}</h2>
+      <h2 className="daily-total-title">📊 Today&apos;s Total</h2>
       <div className="nutrition-grid total-grid">
         <div className="nutrition-item calories total-item">
           <span className="nutrition-value total-value">{Math.round(total.calories)}</span>
-          <span className="nutrition-label">{t.kcal}</span>
+          <span className="nutrition-label">kcal</span>
         </div>
         <div className="nutrition-item total-item">
-          <span className="nutrition-value total-value">{Math.round(total.protein)}{t.g}</span>
-          <span className="nutrition-label">{t.protein}</span>
+          <span className="nutrition-value total-value">{Math.round(total.protein)}g</span>
+          <span className="nutrition-label">Protein</span>
         </div>
         <div className="nutrition-item total-item">
-          <span className="nutrition-value total-value">{Math.round(total.carbs)}{t.g}</span>
-          <span className="nutrition-label">{t.carbs}</span>
+          <span className="nutrition-value total-value">{Math.round(total.carbs)}g</span>
+          <span className="nutrition-label">Carbs</span>
         </div>
         <div className="nutrition-item total-item">
-          <span className="nutrition-value total-value">{Math.round(total.fat)}{t.g}</span>
-          <span className="nutrition-label">{t.fat}</span>
+          <span className="nutrition-value total-value">{Math.round(total.fat)}g</span>
+          <span className="nutrition-label">Fat</span>
         </div>
       </div>
     </div>

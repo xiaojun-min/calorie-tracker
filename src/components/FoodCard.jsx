@@ -1,4 +1,4 @@
-export default function FoodCard({ entry, onDelete, t }) {
+export default function FoodCard({ entry, onDelete }) {
   return (
     <div className="food-card">
       <div className="food-card-header">
@@ -10,7 +10,7 @@ export default function FoodCard({ entry, onDelete, t }) {
         <button
           className="delete-btn"
           onClick={() => onDelete(entry.id)}
-          aria-label={t.deleteEntry}
+          aria-label="Delete"
         >
           🗑
         </button>
@@ -27,19 +27,19 @@ export default function FoodCard({ entry, onDelete, t }) {
       <div className="nutrition-grid">
         <div className="nutrition-item calories">
           <span className="nutrition-value">{entry.calories}</span>
-          <span className="nutrition-label">{t.kcal}</span>
+          <span className="nutrition-label">kcal</span>
         </div>
         <div className="nutrition-item">
-          <span className="nutrition-value">{entry.protein}{t.g}</span>
-          <span className="nutrition-label">{t.protein}</span>
+          <span className="nutrition-value">{entry.protein}g</span>
+          <span className="nutrition-label">Protein</span>
         </div>
         <div className="nutrition-item">
-          <span className="nutrition-value">{entry.carbs}{t.g}</span>
-          <span className="nutrition-label">{t.carbs}</span>
+          <span className="nutrition-value">{entry.carbs}g</span>
+          <span className="nutrition-label">Carbs</span>
         </div>
         <div className="nutrition-item">
-          <span className="nutrition-value">{entry.fat}{t.g}</span>
-          <span className="nutrition-label">{t.fat}</span>
+          <span className="nutrition-value">{entry.fat}g</span>
+          <span className="nutrition-label">Fat</span>
         </div>
       </div>
     </div>

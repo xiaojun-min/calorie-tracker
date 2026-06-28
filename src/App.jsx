@@ -1,117 +1,123 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import FoodInput from "./components/FoodInput";
 import FoodCard from "./components/FoodCard";
+import FoodHistory from "./components/FoodHistory";
 import DailyTotal from "./components/DailyTotal";
 import Settings from "./components/Settings";
-import { translations } from "./i18n";
 import { analyzeFood } from "./api/claude";
 import "./App.css";
 
+function getToday() {
+  return new Date().toLocaleDateString("en-CA");
+}
+
 function getTime() {
-  const now = new Date();
-  return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function App() {
-  const [lang, setLang] = useState(() => localStorage.getItem("lang") || "en");
   const [tab, setTab] = useState("home");
-  const [entries, setEntries] = useState([]);
+  const [entries, setEntries] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("food_entries") || "[]"); }
+    catch { return []; }
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const t = translations[lang];
+  // Auto-populate API key from Vercel env var on first run
+  useEffect(() => {
+    const envKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+    if (envKey && !localStorage.getItem("anthropic_api_key")) {
+      localStorage.setItem("anthropic_api_key", envKey);
+    }
+  }, []);
 
-  function handleLangChange(l) {
-    setLang(l);
-    localStorage.setItem("lang", l);
-  }
+  // Persist entries to localStorage whenever they change
+  useEffect(() => {
+    try { localStorage.setItem("food_entries", JSON.stringify(entries)); }
+    catch { /* storage quota exceeded */ }
+  }, [entries]);
 
-  const handleAdd = useCallback(
-    async ({ description, imageBase64, imageMimeType }) => {
-      const apiKey = localStorage.getItem("anthropic_api_key") || "";
-      if (!apiKey) {
-        setError(t.errorNoKey);
-        setTab("settings");
-        return;
-      }
-      if (!description?.trim() && !imageBase64) {
-        setError(t.errorNoInput);
-        return;
-      }
-      setError("");
-      setLoading(true);
-      try {
-        const result = await analyzeFood({ description, imageBase64, imageMimeType, apiKey });
-        const imagePreview = imageBase64
-          ? `data:${imageMimeType || "image/jpeg"};base64,${imageBase64}`
-          : null;
-        const newEntry = {
-          id: Date.now(),
-          name: result.name,
-          emoji: result.emoji || "🍽️",
-          calories: Math.round(result.calories || 0),
-          protein: Math.round(result.protein || 0),
-          carbs: Math.round(result.carbs || 0),
-          fat: Math.round(result.fat || 0),
-          time: getTime(),
-          imagePreview,
-        };
-        setEntries((prev) => [newEntry, ...prev]);
-      } catch (err) {
-        setError(err.message || t.errorAnalysis);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [t]
-  );
+  const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail }) => {
+    const apiKey = localStorage.getItem("anthropic_api_key") || "";
+    if (!apiKey) {
+      setError("Please set your Anthropic API key in Settings first.");
+      setTab("settings");
+      return;
+    }
+    if (!description?.trim() && !imageBase64) {
+      setError("Please describe your food or upload a photo.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const result = await analyzeFood({ description, imageBase64, imageMimeType, apiKey });
+      const newEntry = {
+        id: Date.now(),
+        date: getToday(),
+        name: result.name,
+        emoji: result.emoji || "🍽️",
+        calories: Math.round(result.calories || 0),
+        protein: Math.round(result.protein || 0),
+        carbs: Math.round(result.carbs || 0),
+        fat: Math.round(result.fat || 0),
+        time: getTime(),
+        imagePreview: imageThumbnail || null,
+      };
+      setEntries((prev) => [newEntry, ...prev]);
+    } catch (err) {
+      setError(err.message || "Could not analyze food. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   function handleDelete(id) {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
+  const todayEntries = entries.filter((e) => e.date === getToday());
+
   return (
     <div className="app">
       <header className="app-header">
-        <h1 className="app-title">{t.appTitle}</h1>
+        <h1 className="app-title">🍽️ What I Ate Today</h1>
       </header>
 
       {tab === "home" && (
         <main className="main-content">
-          <FoodInput onAdd={handleAdd} t={t} loading={loading} />
+          <FoodInput onAdd={handleAdd} loading={loading} />
 
-          {error && (
-            <div className="error-banner">
-              ⚠️ {error}
-            </div>
-          )}
+          {error && <div className="error-banner">⚠️ {error}</div>}
 
-          {entries.length === 0 ? (
+          {todayEntries.length === 0 ? (
             <div className="empty-state">
               <span className="empty-emoji">🥗</span>
-              <p>{t.noEntries}</p>
+              <p>No entries today. Add your first meal!</p>
             </div>
           ) : (
             <>
               <div className="entries-list">
-                {entries.map((entry) => (
-                  <FoodCard
-                    key={entry.id}
-                    entry={entry}
-                    onDelete={handleDelete}
-                    t={t}
-                  />
+                {todayEntries.map((entry) => (
+                  <FoodCard key={entry.id} entry={entry} onDelete={handleDelete} />
                 ))}
               </div>
-              <DailyTotal entries={entries} t={t} />
+              <DailyTotal entries={todayEntries} />
             </>
           )}
         </main>
       )}
 
+      {tab === "history" && (
+        <main className="main-content">
+          <FoodHistory entries={entries} onDelete={handleDelete} />
+        </main>
+      )}
+
       {tab === "settings" && (
         <main className="main-content">
-          <Settings t={t} lang={lang} setLang={handleLangChange} />
+          <Settings />
         </main>
       )}
 
@@ -121,14 +127,21 @@ export default function App() {
           onClick={() => { setTab("home"); setError(""); }}
         >
           <span className="nav-icon">🍽️</span>
-          <span className="nav-label">{t.home}</span>
+          <span className="nav-label">Today</span>
+        </button>
+        <button
+          className={`nav-btn ${tab === "history" ? "active" : ""}`}
+          onClick={() => { setTab("history"); setError(""); }}
+        >
+          <span className="nav-icon">📸</span>
+          <span className="nav-label">History</span>
         </button>
         <button
           className={`nav-btn ${tab === "settings" ? "active" : ""}`}
           onClick={() => { setTab("settings"); setError(""); }}
         >
           <span className="nav-icon">⚙️</span>
-          <span className="nav-label">{t.settings}</span>
+          <span className="nav-label">Settings</span>
         </button>
       </nav>
     </div>

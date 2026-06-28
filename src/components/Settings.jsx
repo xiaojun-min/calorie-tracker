@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-export default function Settings({ t, lang, setLang }) {
+const ENV_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
+
+export default function Settings() {
   const [key, setKey] = useState(() => localStorage.getItem("anthropic_api_key") || "");
   const [saved, setSaved] = useState(false);
 
@@ -12,45 +14,35 @@ export default function Settings({ t, lang, setLang }) {
 
   return (
     <div className="settings-page">
-      <h2 className="settings-title">⚙️ {t.settingsTitle}</h2>
+      <h2 className="settings-title">⚙️ Settings</h2>
 
       <div className="settings-section">
-        <label className="settings-label">{t.language}</label>
-        <div className="lang-toggle">
-          <button
-            className={`lang-btn ${lang === "en" ? "active" : ""}`}
-            onClick={() => setLang("en")}
-          >
-            🇺🇸 English
-          </button>
-          <button
-            className={`lang-btn ${lang === "zh" ? "active" : ""}`}
-            onClick={() => setLang("zh")}
-          >
-            🇹🇼 繁體中文
-          </button>
-        </div>
-      </div>
-
-      <div className="settings-section">
-        <p className="settings-desc">{t.settingsDesc}</p>
-        <label className="settings-label">{t.apiKeyLabel}</label>
-        <input
-          className="api-key-input"
-          type="password"
-          placeholder={t.apiKeyPlaceholder}
-          value={key}
-          onChange={(e) => {
-            setKey(e.target.value);
-            setSaved(false);
-          }}
-          autoComplete="off"
-          spellCheck={false}
-        />
-        <button className="save-key-btn" onClick={saveKey} disabled={!key.trim()}>
-          {saved ? `✅ ${t.keySaved}` : `💾 ${t.saveKey}`}
-        </button>
-        <p className="settings-hint">🔗 {t.getKeyLink}</p>
+        <label className="settings-label">Anthropic API Key</label>
+        {ENV_KEY ? (
+          <p className="settings-configured">✅ API key configured — you&apos;re all set!</p>
+        ) : (
+          <>
+            <p className="settings-desc">
+              Enter your Anthropic API key to enable food analysis. It&apos;s saved only to this browser.
+            </p>
+            <input
+              className="api-key-input"
+              type="password"
+              placeholder="sk-ant-..."
+              value={key}
+              onChange={(e) => {
+                setKey(e.target.value);
+                setSaved(false);
+              }}
+              autoComplete="off"
+              spellCheck={false}
+            />
+            <button className="save-key-btn" onClick={saveKey} disabled={!key.trim()}>
+              {saved ? "✅ Key saved!" : "💾 Save Key"}
+            </button>
+            <p className="settings-hint">🔗 Get your key at console.anthropic.com</p>
+          </>
+        )}
       </div>
     </div>
   );
