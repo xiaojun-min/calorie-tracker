@@ -59,7 +59,7 @@ export default function App() {
 
   // Auto-populate API key from env var on first run
   useEffect(() => {
-    const envKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+    const envKey = import.meta.env.ANTHROPIC_API_KEY;
     if (envKey && !localStorage.getItem("anthropic_api_key")) {
       localStorage.setItem("anthropic_api_key", envKey);
     }
