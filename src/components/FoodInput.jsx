@@ -175,38 +175,49 @@ export default function FoodInput({ onAdd, loading }) {
             rows={3}
           />
         ) : (
-          <div className="photo-area">
-            {imagePreview ? (
-              <div className="photo-preview-wrapper">
-                <img
-                  src={imagePreview}
-                  alt="food preview"
-                  className="photo-preview"
+          <>
+            <div className="photo-area">
+              {imagePreview ? (
+                <div className="photo-preview-wrapper">
+                  <img
+                    src={imagePreview}
+                    alt="food preview"
+                    className="photo-preview"
+                    onClick={() => fileRef.current?.click()}
+                  />
+                  <button type="button" className="remove-photo-btn" onClick={removePhoto}>
+                    ✕ Remove
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="upload-btn"
                   onClick={() => fileRef.current?.click()}
-                />
-                <button type="button" className="remove-photo-btn" onClick={removePhoto}>
-                  ✕ Remove
+                >
+                  <span className="upload-icon">📸</span>
+                  <span>Choose photo or take one</span>
                 </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="upload-btn"
-                onClick={() => fileRef.current?.click()}
-              >
-                <span className="upload-icon">📸</span>
-                <span>Choose photo or take one</span>
-              </button>
+              )}
+              {photoError && <p className="photo-error">{photoError}</p>}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFile}
+                style={{ display: "none" }}
+              />
+            </div>
+            {imageBase64 && (
+              <textarea
+                className="food-textarea"
+                placeholder="Add context (optional): e.g. I only ate the burger, skipped the fries"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+              />
             )}
-            {photoError && <p className="photo-error">{photoError}</p>}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFile}
-              style={{ display: "none" }}
-            />
-          </div>
+          </>
         )}
 
         {/* Portion free-text input — shown once there's content to submit */}

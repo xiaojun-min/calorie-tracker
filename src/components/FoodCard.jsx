@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export default function FoodCard({ entry, onDelete, onEdit }) {
   const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(entry.name);
   const [editDate, setEditDate] = useState(entry.date);
   const [editMultiplier, setEditMultiplier] = useState("1");
 
@@ -9,6 +10,7 @@ export default function FoodCard({ entry, onDelete, onEdit }) {
   const ratingClass = rating >= 7 ? "good" : rating >= 4 ? "fair" : "poor";
 
   function openEdit() {
+    setEditName(entry.name);
     setEditDate(entry.date);
     setEditMultiplier("1");
     setEditing(true);
@@ -16,7 +18,11 @@ export default function FoodCard({ entry, onDelete, onEdit }) {
 
   function handleSave() {
     const mult = Math.max(0.1, Math.min(10, Number(editMultiplier) || 1));
-    onEdit(entry.id, { date: editDate, multiplier: mult });
+    onEdit(entry.id, {
+      date: editDate,
+      multiplier: mult,
+      name: editName.trim() || entry.name,
+    });
     setEditing(false);
   }
 
@@ -46,6 +52,16 @@ export default function FoodCard({ entry, onDelete, onEdit }) {
 
       {editing && (
         <div className="edit-panel">
+          <div className="edit-row">
+            <label className="edit-label">Food name</label>
+            <input
+              type="text"
+              className="edit-date-input"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Food name"
+            />
+          </div>
           <div className="edit-row">
             <label className="edit-label">Date</label>
             <input

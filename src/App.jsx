@@ -126,7 +126,7 @@ export default function App() {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
-  function handleEdit(id, { date, multiplier }) {
+  function handleEdit(id, { date, multiplier, name }) {
     setEntries((prev) =>
       prev.map((e) => {
         if (e.id !== id) return e;
@@ -134,6 +134,7 @@ export default function App() {
         return {
           ...e,
           date,
+          name: name || e.name,
           ...(multiplier !== 1 && {
             calories: scale(e.calories),
             protein: scale(e.protein),
