@@ -43,6 +43,7 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
 }`,
   });
 
+  console.log("[API] Prompt:", basePrompt);
   console.log("[API] Calling proxy:", {
     hasImage: !!imageBase64,
     base64Chars: imageBase64?.length,
