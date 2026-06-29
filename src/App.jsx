@@ -4,6 +4,7 @@ import FoodCard from "./components/FoodCard";
 import Reports from "./components/Reports";
 import DailyTotal from "./components/DailyTotal";
 import Settings from "./components/Settings";
+import WeightTracker from "./components/WeightTracker";
 import { analyzeFood } from "./api/claude";
 import { calculateCalorieGoal, calculateNutritionGoals } from "./utils/tdee";
 import "./App.css";
@@ -193,6 +194,12 @@ export default function App() {
         </main>
       )}
 
+      {tab === "weight" && (
+        <main className="main-content">
+          <WeightTracker />
+        </main>
+      )}
+
       {tab === "settings" && (
         <main className="main-content">
           <Settings onProfileSaved={() => setProfileVersion((v) => v + 1)} />
@@ -231,6 +238,13 @@ export default function App() {
         >
           <span className="nav-icon">📊</span>
           <span className="nav-label">Reports</span>
+        </button>
+        <button
+          className={`nav-btn ${tab === "weight" ? "active" : ""}`}
+          onClick={() => { setTab("weight"); setError(""); }}
+        >
+          <span className="nav-icon">⚖️</span>
+          <span className="nav-label">Weight</span>
         </button>
         <button
           className={`nav-btn ${tab === "settings" ? "active" : ""}`}
