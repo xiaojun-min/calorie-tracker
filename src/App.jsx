@@ -65,10 +65,15 @@ export default function App() {
     }
   }, []);
 
-  // Persist entries to localStorage whenever they change
+  // Persist entries to localStorage whenever they change.
+  // Strip imagePreview (large base64) before saving — images are kept in
+  // memory for the current session but not persisted, so localStorage
+  // doesn't hit the ~5MB quota.
   useEffect(() => {
-    try { localStorage.setItem("food_entries", JSON.stringify(entries)); }
-    catch { /* storage quota exceeded */ }
+    try {
+      const toStore = entries.map(({ imagePreview: _img, ...rest }) => rest);
+      localStorage.setItem("food_entries", JSON.stringify(toStore));
+    } catch { /* storage quota exceeded even without images */ }
   }, [entries]);
 
   // Derive goals from saved profile; refreshes when profile is saved
