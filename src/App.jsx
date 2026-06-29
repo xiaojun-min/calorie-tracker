@@ -92,7 +92,7 @@ export default function App() {
   }, [profileVersion]);
 
   const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail, portionText = "" }) => {
-    const apiKey = localStorage.getItem("anthropic_api_key") || "";
+    const apiKey = localStorage.getItem("anthropic_api_key") || import.meta.env.ANTHROPIC_API_KEY || "";
     if (!description?.trim() && !imageBase64) {
       setError("Please describe your food or upload a photo.");
       return;
