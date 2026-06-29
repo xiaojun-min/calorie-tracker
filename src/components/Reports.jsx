@@ -41,7 +41,7 @@ function getStreak(grouped) {
   return streak;
 }
 
-export default function Reports({ entries, onDelete, calorieGoal = 0 }) {
+export default function Reports({ entries, onDelete, onEdit, calorieGoal = 0 }) {
   const grouped = entries.reduce((acc, e) => {
     const key = e.date || "Unknown";
     if (!acc[key]) acc[key] = [];
@@ -144,7 +144,7 @@ export default function Reports({ entries, onDelete, calorieGoal = 0 }) {
                 </div>
                 <div className="entries-list">
                   {dayEntries.map((entry) => (
-                    <FoodCard key={entry.id} entry={entry} onDelete={onDelete} />
+                    <FoodCard key={entry.id} entry={entry} onDelete={onDelete} onEdit={onEdit} />
                   ))}
                 </div>
               </div>

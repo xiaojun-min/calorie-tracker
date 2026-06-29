@@ -126,6 +126,29 @@ export default function App() {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
+  function handleEdit(id, { date, multiplier }) {
+    setEntries((prev) =>
+      prev.map((e) => {
+        if (e.id !== id) return e;
+        const scale = (v) => Math.round((v || 0) * multiplier);
+        return {
+          ...e,
+          date,
+          ...(multiplier !== 1 && {
+            calories: scale(e.calories),
+            protein: scale(e.protein),
+            carbs: scale(e.carbs),
+            fat: scale(e.fat),
+            fiber: scale(e.fiber),
+            sugar: scale(e.sugar),
+            sodium: scale(e.sodium),
+            saturated_fat: scale(e.saturated_fat),
+          }),
+        };
+      })
+    );
+  }
+
   const todayEntries = entries.filter((e) => e.date === getToday());
 
   return (
@@ -149,7 +172,7 @@ export default function App() {
             <>
               <div className="entries-list">
                 {todayEntries.map((entry) => (
-                  <FoodCard key={entry.id} entry={entry} onDelete={handleDelete} />
+                  <FoodCard key={entry.id} entry={entry} onDelete={handleDelete} onEdit={handleEdit} />
                 ))}
               </div>
               <DailyTotal entries={todayEntries} calorieGoal={calorieGoal} nutritionGoals={nutritionGoals} />
@@ -160,7 +183,7 @@ export default function App() {
 
       {tab === "reports" && (
         <main className="main-content">
-          <Reports entries={entries} onDelete={handleDelete} calorieGoal={calorieGoal} />
+          <Reports entries={entries} onDelete={handleDelete} onEdit={handleEdit} calorieGoal={calorieGoal} />
         </main>
       )}
 

@@ -986,3 +986,149 @@
 .debug-log-entry.error .debug-msg {
   color: #FF6B6B;
 }
+
+/* ───── Food Card Edit Panel ───── */
+.food-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.edit-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.edit-btn:active {
+  background: #E8E8E8;
+}
+
+.edit-panel {
+  border-top: 1.5px solid var(--border);
+  margin-top: 12px;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.edit-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.edit-date-input {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+.edit-date-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.edit-multiplier-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mult-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.mult-btn:active {
+  background: #E8E8E8;
+}
+
+.edit-mult-input {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+
+.edit-mult-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.edit-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-cancel-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.edit-save-btn {
+  flex: 2;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255,107,71,0.3);
+  transition: opacity 0.15s;
+}
+
+.edit-save-btn:active {
+  opacity: 0.85;
+}
