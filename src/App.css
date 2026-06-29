@@ -919,6 +919,81 @@
   text-align: center;
 }
 
+/* ───── Macro chart tabs ───── */
+.macro-tabs {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.macro-tab {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+  transition: all 0.15s;
+}
+
+.macro-tab.active {
+  color: white;
+}
+
+/* ───── 7-day average grid ───── */
+.avg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.avg-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 10px 6px 8px;
+  gap: 1px;
+}
+
+.avg-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.avg-unit {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.avg-label {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.avg-goal {
+  font-size: 0.62rem;
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+/* ───── Daily nutrition row under date header ───── */
+.day-nutrition-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 4px 4px 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
 /* ───── Debug Panel ───── */
 .debug-panel {
   background: #1a1a2e;

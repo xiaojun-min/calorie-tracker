@@ -189,7 +189,7 @@ export default function App() {
 
       {tab === "reports" && (
         <main className="main-content">
-          <Reports entries={entries} onDelete={handleDelete} onEdit={handleEdit} calorieGoal={calorieGoal} />
+          <Reports entries={entries} onDelete={handleDelete} onEdit={handleEdit} calorieGoal={calorieGoal} nutritionGoals={nutritionGoals} />
         </main>
       )}
 
