@@ -1,10 +1,50 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { calculateCalorieGoal } from "../utils/tdee";
+
+const DATA_KEYS = ["food_entries", "weight_entries", "weight_unit", "user_profile"];
+
+function exportData() {
+  const snapshot = {};
+  DATA_KEYS.forEach((k) => {
+    const v = localStorage.getItem(k);
+    if (v != null) snapshot[k] = v;
+  });
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `calorie-log-backup-${new Date().toLocaleDateString("en-CA")}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export default function Settings({ onProfileSaved }) {
   const [key, setKey] = useState(() => localStorage.getItem("anthropic_api_key") || "");
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
+  const [importStatus, setImportStatus] = useState("");
+  const importRef = useRef(null);
+
+  function handleImport(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        let count = 0;
+        DATA_KEYS.forEach((k) => {
+          if (data[k] != null) { localStorage.setItem(k, data[k]); count++; }
+        });
+        setImportStatus(`✅ Imported ${count} data ${count === 1 ? "item" : "items"}. Reload the app to see your data.`);
+        onProfileSaved?.();
+      } catch {
+        setImportStatus("❌ Could not read that file. Make sure it's a backup exported from this app.");
+      }
+      if (importRef.current) importRef.current.value = "";
+    };
+    reader.readAsText(file);
+  }
 
   const [profile, setProfile] = useState(() => {
     try { return JSON.parse(localStorage.getItem("user_profile") || "{}"); }
@@ -171,6 +211,25 @@ export default function Settings({ onProfileSaved }) {
         <button className="save-key-btn" onClick={saveProfile}>
           {profileSaved ? "✅ Profile saved!" : "💾 Save Profile"}
         </button>
+      </div>
+
+      {/* Export / Import */}
+      <div className="settings-section">
+        <label className="settings-label">Backup &amp; Restore</label>
+        <p className="settings-desc">
+          Export saves all your food entries, weight log, and profile to a file.
+          Import it on any device or browser to restore your data.
+        </p>
+        <div className="backup-row">
+          <button className="backup-btn export" onClick={exportData}>
+            ⬇️ Export backup
+          </button>
+          <button className="backup-btn import" onClick={() => importRef.current?.click()}>
+            ⬆️ Import backup
+          </button>
+          <input ref={importRef} type="file" accept=".json,application/json" onChange={handleImport} style={{ display: "none" }} />
+        </div>
+        {importStatus && <p className="import-status">{importStatus}</p>}
       </div>
     </div>
   );
