@@ -15,12 +15,12 @@ export async function analyzeFood({ description, imageBase64, imageMimeType, api
   let basePrompt;
   if (description) {
     basePrompt = portionText
-      ? `Analyze this food: "${description}". I ate ${portionText} of this. Estimate nutrition for the amount I ate.`
-      : `Analyze this food: "${description}". Estimate the nutritional content.`;
+      ? `I ate "${description}" and specifically I had ${portionText} of it. Estimate nutrition for exactly the amount I ate.`
+      : `I ate this: "${description}". Estimate the nutritional content for exactly the amount and portion described.`;
   } else {
     basePrompt = portionText
-      ? `Analyze this food in the image. I ate ${portionText} of this. Estimate nutrition for the amount I ate.`
-      : "Analyze this food in the image. Estimate the nutritional content.";
+      ? `I ate what is shown in the image. I had ${portionText} of it. Estimate nutrition for exactly the amount I ate.`
+      : "I ate what is shown in this image. Estimate the nutritional content for exactly the portion visible.";
   }
 
   content.push({
