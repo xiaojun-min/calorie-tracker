@@ -1,4 +1,7 @@
 export default function FoodCard({ entry, onDelete }) {
+  const rating = entry.health_rating;
+  const ratingClass = rating >= 7 ? "good" : rating >= 4 ? "fair" : "poor";
+
   return (
     <div className="food-card">
       <div className="food-card-header">
@@ -7,8 +10,8 @@ export default function FoodCard({ entry, onDelete }) {
           <span className="food-name">{entry.name}</span>
           <div className="food-card-meta">
             <span className="food-time">{entry.time}</span>
-            {entry.mealLabel && (
-              <span className="meal-label-badge">{entry.mealLabel}</span>
+            {rating != null && (
+              <span className={`health-badge ${ratingClass}`}>★ {rating}/10</span>
             )}
           </div>
         </div>

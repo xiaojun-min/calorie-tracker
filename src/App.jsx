@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import FoodInput from "./components/FoodInput";
 import FoodCard from "./components/FoodCard";
-import FoodHistory from "./components/FoodHistory";
+import Reports from "./components/Reports";
 import DailyTotal from "./components/DailyTotal";
 import Settings from "./components/Settings";
 import { analyzeFood } from "./api/claude";
-import { calculateCalorieGoal } from "./utils/tdee";
+import { calculateCalorieGoal, calculateNutritionGoals } from "./utils/tdee";
 import "./App.css";
 
 function getToday() {
@@ -71,7 +71,7 @@ export default function App() {
     catch { /* storage quota exceeded */ }
   }, [entries]);
 
-  // Derive calorie goal from saved profile; refreshes when profile is saved
+  // Derive goals from saved profile; refreshes when profile is saved
   const calorieGoal = useMemo(() => {
     try {
       const profile = JSON.parse(localStorage.getItem("user_profile") || "{}");
@@ -79,7 +79,14 @@ export default function App() {
     } catch { return 0; }
   }, [profileVersion]);
 
-  const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail, portion = 1, mealLabel = "Snack" }) => {
+  const nutritionGoals = useMemo(() => {
+    try {
+      const profile = JSON.parse(localStorage.getItem("user_profile") || "{}");
+      return calculateNutritionGoals(profile);
+    } catch { return null; }
+  }, [profileVersion]);
+
+  const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail, portionText = "" }) => {
     const apiKey = localStorage.getItem("anthropic_api_key") || "";
     if (!description?.trim() && !imageBase64) {
       setError("Please describe your food or upload a photo.");
@@ -88,23 +95,22 @@ export default function App() {
     setError("");
     setLoading(true);
     try {
-      const result = await analyzeFood({ description, imageBase64, imageMimeType, apiKey });
-      const scale = (v) => Math.round((v || 0) * portion);
+      const result = await analyzeFood({ description, imageBase64, imageMimeType, apiKey, portionText });
       const newEntry = {
         id: Date.now(),
         date: getToday(),
         time: getTime(),
-        mealLabel,
         name: result.name,
         emoji: result.emoji || "🍽️",
-        calories: scale(result.calories),
-        protein: scale(result.protein),
-        carbs: scale(result.carbs),
-        fat: scale(result.fat),
-        fiber: scale(result.fiber),
-        sugar: scale(result.sugar),
-        sodium: scale(result.sodium),
-        saturated_fat: scale(result.saturated_fat),
+        calories: Math.round(result.calories || 0),
+        protein: Math.round(result.protein || 0),
+        carbs: Math.round(result.carbs || 0),
+        fat: Math.round(result.fat || 0),
+        fiber: Math.round(result.fiber || 0),
+        sugar: Math.round(result.sugar || 0),
+        sodium: Math.round(result.sodium || 0),
+        saturated_fat: Math.round(result.saturated_fat || 0),
+        health_rating: result.health_rating ?? null,
         imagePreview: imageThumbnail || null,
       };
       setEntries((prev) => [newEntry, ...prev]);
@@ -146,15 +152,15 @@ export default function App() {
                   <FoodCard key={entry.id} entry={entry} onDelete={handleDelete} />
                 ))}
               </div>
-              <DailyTotal entries={todayEntries} calorieGoal={calorieGoal} />
+              <DailyTotal entries={todayEntries} calorieGoal={calorieGoal} nutritionGoals={nutritionGoals} />
             </>
           )}
         </main>
       )}
 
-      {tab === "history" && (
+      {tab === "reports" && (
         <main className="main-content">
-          <FoodHistory entries={entries} onDelete={handleDelete} />
+          <Reports entries={entries} onDelete={handleDelete} calorieGoal={calorieGoal} />
         </main>
       )}
 
@@ -191,11 +197,11 @@ export default function App() {
           <span className="nav-label">Today</span>
         </button>
         <button
-          className={`nav-btn ${tab === "history" ? "active" : ""}`}
-          onClick={() => { setTab("history"); setError(""); }}
+          className={`nav-btn ${tab === "reports" ? "active" : ""}`}
+          onClick={() => { setTab("reports"); setError(""); }}
         >
-          <span className="nav-icon">📅</span>
-          <span className="nav-label">History</span>
+          <span className="nav-icon">📊</span>
+          <span className="nav-label">Reports</span>
         </button>
         <button
           className={`nav-btn ${tab === "settings" ? "active" : ""}`}

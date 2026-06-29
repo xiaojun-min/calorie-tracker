@@ -21,3 +21,19 @@ export function calculateCalorieGoal({ age, gender, heightCm, weightKg, activity
   const deficit = DEFICIT[String(weeklyLossGoal)] ?? 0;
   return { bmr: Math.round(bmr), tdee, goal: Math.max(1200, tdee - deficit) };
 }
+
+export function calculateNutritionGoals(profile) {
+  const result = calculateCalorieGoal(profile);
+  if (!result) return null;
+  const { goal } = result;
+  return {
+    calories: goal,
+    protein: Math.round((goal * 0.25) / 4),
+    carbs: Math.round((goal * 0.50) / 4),
+    fat: Math.round((goal * 0.25) / 9),
+    fiber: profile.gender === "male" ? 38 : 25,
+    sugar: Math.round((goal * 0.10) / 4),
+    sodium: 2300,
+    saturated_fat: Math.round((goal * 0.07) / 9),
+  };
+}

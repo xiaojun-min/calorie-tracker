@@ -1,4 +1,13 @@
-export default function DailyTotal({ entries, calorieGoal = 0 }) {
+const MACRO_ROWS = [
+  { key: "protein", label: "Protein", unit: "g", color: "#4CAF50" },
+  { key: "carbs", label: "Carbs", unit: "g", color: "#2196F3" },
+  { key: "fat", label: "Fat", unit: "g", color: "#FF9800" },
+  { key: "fiber", label: "Fiber", unit: "g", color: "#7CB342" },
+  { key: "sugar", label: "Sugar", unit: "g", color: "#E91E63" },
+  { key: "sodium", label: "Sodium", unit: "mg", color: "#8E24AA" },
+];
+
+export default function DailyTotal({ entries, calorieGoal = 0, nutritionGoals = null }) {
   const total = entries.reduce(
     (acc, e) => ({
       calories: acc.calories + (e.calories || 0),
@@ -65,6 +74,34 @@ export default function DailyTotal({ entries, calorieGoal = 0 }) {
               style={{ width: `${Math.min(pct, 100)}%` }}
             />
           </div>
+        </div>
+      )}
+
+      {nutritionGoals && (
+        <div className="macro-goals">
+          <p className="macro-goals-title">Daily Goals</p>
+          {MACRO_ROWS.map(({ key, label, unit, color }) => {
+            const val = Math.round(total[key] || 0);
+            const goal = nutritionGoals[key] || 0;
+            const fillPct = goal > 0 ? Math.min(100, Math.round((val / goal) * 100)) : 0;
+            const over = goal > 0 && val > goal;
+            return (
+              <div key={key} className="macro-goal-row">
+                <div className="macro-goal-labels">
+                  <span className="macro-goal-name">{label}</span>
+                  <span className="macro-goal-values" style={{ color: over ? "#E53935" : "rgba(255,255,255,0.65)" }}>
+                    {val}{unit} / {goal}{unit}
+                  </span>
+                </div>
+                <div className="macro-goal-track">
+                  <div
+                    className="macro-goal-fill"
+                    style={{ width: `${fillPct}%`, background: over ? "#E53935" : color }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

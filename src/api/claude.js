@@ -1,4 +1,4 @@
-export async function analyzeFood({ description, imageBase64, imageMimeType, apiKey }) {
+export async function analyzeFood({ description, imageBase64, imageMimeType, apiKey, portionText }) {
   const content = [];
 
   if (imageBase64) {
@@ -12,13 +12,20 @@ export async function analyzeFood({ description, imageBase64, imageMimeType, api
     });
   }
 
-  const textPrompt = description
-    ? `Analyze this food: "${description}". Estimate the nutritional content.`
-    : "Analyze this food in the image. Estimate the nutritional content.";
+  let basePrompt;
+  if (description) {
+    basePrompt = portionText
+      ? `Analyze this food: "${description}". I ate ${portionText} of this. Estimate nutrition for the amount I ate.`
+      : `Analyze this food: "${description}". Estimate the nutritional content.`;
+  } else {
+    basePrompt = portionText
+      ? `Analyze this food in the image. I ate ${portionText} of this. Estimate nutrition for the amount I ate.`
+      : "Analyze this food in the image. Estimate the nutritional content.";
+  }
 
   content.push({
     type: "text",
-    text: `${textPrompt}
+    text: `${basePrompt}
 
 Reply ONLY with a JSON object in this exact format (no markdown, no explanation):
 {
@@ -31,7 +38,8 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
   "fiber": <number in grams>,
   "sugar": <number in grams>,
   "sodium": <number in milligrams>,
-  "saturated_fat": <number in grams>
+  "saturated_fat": <number in grams>,
+  "health_rating": <integer 1-10 where 10 is most healthy>
 }`,
   });
 
@@ -39,6 +47,7 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
     hasImage: !!imageBase64,
     base64Chars: imageBase64?.length,
     hasDescription: !!description,
+    portionText: portionText || "(none)",
   });
 
   let response;

@@ -44,36 +44,11 @@
   border: 1.5px solid var(--border);
 }
 
-/* ───── Meal Label Row ───── */
-.meal-label-row {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.meal-label-btn {
-  flex: 1;
-  padding: 8px 4px;
-  border-radius: var(--radius-sm);
-  font-size: 0.78rem;
-  font-weight: 600;
-  background: var(--bg);
-  color: var(--text-muted);
-  border: 1.5px solid var(--border);
-  transition: all 0.18s ease;
-}
-
-.meal-label-btn.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-/* ───── Portion Selector ───── */
+/* ───── Portion Selector (free text) ───── */
 .portion-selector {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .portion-label {
@@ -84,26 +59,19 @@
   letter-spacing: 0.05em;
 }
 
-.portion-btns {
-  display: flex;
-  gap: 6px;
-}
-
-.portion-btn {
-  flex: 1;
-  padding: 9px 4px;
+.portion-text-input {
+  width: 100%;
+  padding: 10px 12px;
   border-radius: var(--radius-sm);
-  font-size: 0.88rem;
-  font-weight: 600;
-  background: var(--bg);
-  color: var(--text-muted);
   border: 1.5px solid var(--border);
-  transition: all 0.18s ease;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.95rem;
+  transition: border-color 0.15s;
 }
 
-.portion-btn.active {
-  background: var(--primary);
-  color: white;
+.portion-text-input:focus {
+  outline: none;
   border-color: var(--primary);
 }
 
@@ -327,15 +295,18 @@
   gap: 6px;
 }
 
-.meal-label-badge {
+/* ───── Health Rating Badge ───── */
+.health-badge {
   font-size: 0.65rem;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 20px;
-  background: var(--primary);
   color: white;
   letter-spacing: 0.02em;
 }
+.health-badge.good { background: #4CAF50; }
+.health-badge.fair { background: #FF9800; }
+.health-badge.poor { background: #E53935; }
 
 .delete-btn {
   width: 40px;
@@ -777,4 +748,241 @@
   color: var(--danger);
   font-weight: 500;
   text-align: center;
+}
+
+/* ───── Macro Goals (DailyTotal) ───── */
+.macro-goals {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.macro-goals-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.macro-goal-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.macro-goal-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.macro-goal-name {
+  color: rgba(255,255,255,0.85);
+}
+
+.macro-goal-values {
+  color: rgba(255,255,255,0.65);
+}
+
+.macro-goal-track {
+  height: 6px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.macro-goal-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* ───── Reports Page ───── */
+.reports-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reports-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.summary-stat {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: var(--shadow);
+}
+
+.summary-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.summary-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ───── Weekly Bar Chart ───── */
+.weekly-chart-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.chart-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.weekly-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 120px;
+}
+
+.chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+}
+
+.chart-cal-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-height: 14px;
+  text-align: center;
+}
+
+.chart-bar-track {
+  flex: 1;
+  width: 100%;
+  background: var(--bg);
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.chart-bar-fill {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.4s ease;
+}
+
+.chart-bar-fill.good { background: var(--success); }
+.chart-bar-fill.warn { background: #FF9800; }
+.chart-bar-fill.over { background: var(--danger); }
+.chart-bar-fill.empty { background: transparent; }
+
+.chart-day-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.chart-goal-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* ───── Debug Panel ───── */
+.debug-panel {
+  background: #1a1a2e;
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-top: 4px;
+}
+
+.debug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.debug-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+}
+
+.debug-clear-btn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 4px 10px;
+  border: none;
+}
+
+.debug-empty {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  padding: 10px 0;
+}
+
+.debug-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.debug-log-entry {
+  display: flex;
+  gap: 8px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-family: monospace;
+}
+
+.debug-time {
+  color: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
+
+.debug-msg {
+  color: rgba(255,255,255,0.75);
+  word-break: break-all;
+}
+
+.debug-log-entry.error .debug-msg {
+  color: #FF6B6B;
 }

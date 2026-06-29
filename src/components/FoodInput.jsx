@@ -93,30 +93,13 @@ async function fileToJpegBase64(file) {
   return { b64, preview: out };
 }
 
-const MEAL_LABELS = ["Breakfast", "Lunch", "Dinner", "Snack"];
-const PORTIONS = [
-  { label: "1/4", value: 0.25 },
-  { label: "1/2", value: 0.5 },
-  { label: "3/4", value: 0.75 },
-  { label: "Whole", value: 1 },
-];
-
-function defaultMealLabel() {
-  const h = new Date().getHours();
-  if (h < 10) return "Breakfast";
-  if (h < 14) return "Lunch";
-  if (h < 18) return "Dinner";
-  return "Snack";
-}
-
 export default function FoodInput({ onAdd, loading }) {
   const [mode, setMode] = useState("text");
   const [description, setDescription] = useState("");
   const [imageBase64, setImageBase64] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [photoError, setPhotoError] = useState("");
-  const [mealLabel, setMealLabel] = useState(() => defaultMealLabel());
-  const [portion, setPortion] = useState(1);
+  const [portionText, setPortionText] = useState("");
   const fileRef = useRef(null);
 
   async function handleFile(e) {
@@ -143,15 +126,13 @@ export default function FoodInput({ onAdd, loading }) {
       imageBase64,
       imageMimeType: imageBase64 ? "image/jpeg" : null,
       imageThumbnail: imagePreview,
-      portion,
-      mealLabel,
+      portionText: portionText.trim(),
     });
     setDescription("");
     setImageBase64(null);
     setImagePreview(null);
     setPhotoError("");
-    setPortion(1);
-    setMealLabel(defaultMealLabel());
+    setPortionText("");
     if (fileRef.current) fileRef.current.value = "";
   }
 
@@ -166,20 +147,6 @@ export default function FoodInput({ onAdd, loading }) {
 
   return (
     <div className="food-input-card">
-      {/* Meal label */}
-      <div className="meal-label-row">
-        {MEAL_LABELS.map((label) => (
-          <button
-            key={label}
-            type="button"
-            className={`meal-label-btn ${mealLabel === label ? "active" : ""}`}
-            onClick={() => setMealLabel(label)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
       {/* Text / Photo toggle */}
       <div className="mode-toggle">
         <button
@@ -242,22 +209,17 @@ export default function FoodInput({ onAdd, loading }) {
           </div>
         )}
 
-        {/* Portion selector — shown once there's content to submit */}
+        {/* Portion free-text input — shown once there's content to submit */}
         {canSubmit && (
           <div className="portion-selector">
-            <span className="portion-label">Portion eaten</span>
-            <div className="portion-btns">
-              {PORTIONS.map((p) => (
-                <button
-                  key={p.value}
-                  type="button"
-                  className={`portion-btn ${portion === p.value ? "active" : ""}`}
-                  onClick={() => setPortion(p.value)}
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
+            <span className="portion-label">Portion eaten (optional)</span>
+            <input
+              className="portion-text-input"
+              type="text"
+              placeholder="e.g. 1 teaspoon, 50g, half a bowl"
+              value={portionText}
+              onChange={(e) => setPortionText(e.target.value)}
+            />
           </div>
         )}
 
