@@ -15,11 +15,11 @@ export async function analyzeFood({ description, imageBase64, imageMimeType, api
   let basePrompt;
   if (description) {
     basePrompt = portionText
-      ? `I ate "${description}" and specifically I had ${portionText} of it. Estimate nutrition for exactly the amount I ate.`
+      ? `I ate ${portionText} of "${description}". Calculate nutrition for this specific portion only — NOT the whole item. Scale the numbers proportionally from the whole.`
       : `I ate this: "${description}". Estimate the nutritional content for exactly the amount and portion described.`;
   } else {
     basePrompt = portionText
-      ? `I ate what is shown in the image. I had ${portionText} of it. Estimate nutrition for exactly the amount I ate.`
+      ? `I ate ${portionText} of what is shown in the image. Calculate nutrition for this specific portion only — NOT the whole item. Scale the numbers proportionally from the whole.`
       : "I ate what is shown in this image. Estimate the nutritional content for exactly the portion visible.";
   }
 
