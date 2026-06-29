@@ -1,3 +1,20 @@
+function parseFraction(text) {
+  if (!text) return null;
+  const t = text.trim().toLowerCase();
+  const slashMatch = t.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (slashMatch) return parseInt(slashMatch[1]) / parseInt(slashMatch[2]);
+  const decimalMatch = t.match(/^(\d+\.?\d*)$/);
+  if (decimalMatch) return parseFloat(decimalMatch[0]);
+  const words = {
+    "half": 0.5, "a half": 0.5, "one half": 0.5,
+    "quarter": 0.25, "a quarter": 0.25, "one quarter": 0.25, "one fourth": 0.25,
+    "third": 1/3, "a third": 1/3, "one third": 1/3,
+    "eighth": 0.125, "one eighth": 0.125,
+    "two thirds": 2/3, "three quarters": 0.75, "three fourths": 0.75,
+  };
+  return words[t] ?? null;
+}
+
 export async function analyzeFood({ description, imageBase64, imageMimeType, apiKey, portionText }) {
   const content = [];
 
@@ -12,14 +29,21 @@ export async function analyzeFood({ description, imageBase64, imageMimeType, api
     });
   }
 
+  const fraction = parseFraction(portionText);
+  const pct = fraction !== null ? `${Math.round(fraction * 1000) / 10}%` : null;
+
   let basePrompt;
   if (description) {
     basePrompt = portionText
-      ? `I ate ${portionText} of "${description}". Calculate nutrition for this specific portion only — NOT the whole item. Scale the numbers proportionally from the whole.`
+      ? fraction !== null
+        ? `Estimate the nutrition for a WHOLE "${description}". Then multiply every value by ${fraction.toFixed(6)} because I ate ${portionText} (${pct}) of it. Return only the scaled values for my portion.`
+        : `I ate ${portionText} of "${description}". Estimate nutrition for exactly this portion only, not the whole item.`
       : `I ate this: "${description}". Estimate the nutritional content for exactly the amount and portion described.`;
   } else {
     basePrompt = portionText
-      ? `I ate ${portionText} of what is shown in the image. Calculate nutrition for this specific portion only — NOT the whole item. Scale the numbers proportionally from the whole.`
+      ? fraction !== null
+        ? `Estimate the nutrition for the WHOLE food in the image. Then multiply every value by ${fraction.toFixed(6)} because I ate ${portionText} (${pct}) of it. Return only the scaled values for my portion.`
+        : `I ate ${portionText} of what is shown in the image. Estimate nutrition for exactly this portion only, not the whole item.`
       : "I ate what is shown in this image. Estimate the nutritional content for exactly the portion visible.";
   }
 
