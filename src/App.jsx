@@ -5,6 +5,7 @@ import Reports from "./components/Reports";
 import DailyTotal from "./components/DailyTotal";
 import Settings from "./components/Settings";
 import WeightTracker from "./components/WeightTracker";
+import RecentFoods from "./components/RecentFoods";
 import { analyzeFood } from "./api/claude";
 import { calculateCalorieGoal, calculateNutritionGoals } from "./utils/tdee";
 import "./App.css";
@@ -184,6 +185,7 @@ export default function App() {
       {tab === "home" && (
         <main className="main-content">
           <FoodInput onAdd={handleAdd} loading={loading} />
+          <RecentFoods entries={entries} onAdd={handleAdd} loading={loading} />
 
           {error && <div className="error-banner">⚠️ {error}</div>}
 

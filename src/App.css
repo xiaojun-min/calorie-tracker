@@ -1759,3 +1759,70 @@
   color: var(--text-muted);
   text-align: center;
 }
+
+/* ── Recent Foods quick-add strip ── */
+.recent-foods {
+  margin-top: 12px;
+}
+
+.recent-foods-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 8px 2px;
+}
+
+.recent-foods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recent-food-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--card-bg);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.recent-food-chip:active,
+.recent-food-chip:hover {
+  border-color: var(--primary);
+  background: rgba(255, 107, 71, 0.06);
+}
+
+.recent-food-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.recent-food-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.recent-food-name {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-food-cal {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
