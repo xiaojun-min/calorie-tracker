@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-
-const KG_TO_LB = 2.20462;
+import { toDisplay, toKg } from "../utils/weight";
 
 function getToday() {
   return new Date().toLocaleDateString("en-CA");
@@ -20,17 +19,6 @@ function formatDate(dateStr) {
   if (date.toDateString() === today.toDateString()) return "Today";
   if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
   return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-}
-
-// Always store in kg; convert only for display/input
-function toDisplay(kg, unit) {
-  if (unit === "lb") return Math.round(kg * KG_TO_LB * 10) / 10;
-  return Math.round(kg * 10) / 10;
-}
-
-function toKg(val, unit) {
-  if (unit === "lb") return Math.round((val / KG_TO_LB) * 100) / 100;
-  return Math.round(val * 100) / 100;
 }
 
 function WeightChart({ data, unit }) {

@@ -40,7 +40,7 @@ export async function scanLabel({ imageBase64, imageMimeType, apiKey }) {
   return JSON.parse(match[0]);
 }
 
-function parseFraction(text) {
+export function parseFraction(text) {
   if (!text) return null;
   const t = text.trim().toLowerCase();
   const slashMatch = t.match(/^(\d+)\s*\/\s*(\d+)$/);
@@ -59,7 +59,7 @@ function parseFraction(text) {
 
 const NUTRITION_KEYS = ["calories", "protein", "carbs", "fat", "fiber", "sugar", "sodium", "saturated_fat"];
 
-function scaleResult(result, fraction, portionText) {
+export function scaleResult(result, fraction, portionText) {
   const scaled = { ...result };
   for (const key of NUTRITION_KEYS) {
     scaled[key] = Math.round((result[key] || 0) * fraction);
