@@ -1,3 +1,44 @@
+export async function scanLabel({ imageBase64, imageMimeType, apiKey }) {
+  const content = [
+    {
+      type: "image",
+      source: { type: "base64", media_type: imageMimeType || "image/jpeg", data: imageBase64 },
+    },
+    {
+      type: "text",
+      text: `This is a nutrition facts label from a food package. Read it carefully and return ONLY this JSON (no markdown):
+{
+  "name": "product name (short, max 40 chars)",
+  "emoji": "single relevant food emoji",
+  "serving_size": "serving size as printed on label (e.g. '1 cup (240ml)' or '1 bar (40g)')",
+  "calories": <calories per serving, number>,
+  "protein": <grams per serving, number>,
+  "carbs": <total carbohydrate grams per serving, number>,
+  "fat": <total fat grams per serving, number>,
+  "fiber": <dietary fiber grams per serving, number or 0>,
+  "sugar": <total sugar grams per serving, number or 0>,
+  "sodium": <sodium milligrams per serving, number or 0>,
+  "saturated_fat": <saturated fat grams per serving, number or 0>
+}`,
+    },
+  ];
+
+  const response = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content, apiKey }),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(`API error ${response.status}: ${err?.error?.message || response.statusText}`);
+  }
+  const data = await response.json();
+  const text = data.content?.[0]?.text || "";
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("Could not read the nutrition label. Try a clearer photo.");
+  return JSON.parse(match[0]);
+}
+
 function parseFraction(text) {
   if (!text) return null;
   const t = text.trim().toLowerCase();

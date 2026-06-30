@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { calculateCalorieGoal } from "../utils/tdee";
 
-const DATA_KEYS = ["food_entries", "weight_entries", "weight_unit", "user_profile"];
+const DATA_KEYS = ["food_entries", "weight_entries", "weight_unit", "user_profile", "food_library"];
 
 function exportData() {
   const snapshot = {};

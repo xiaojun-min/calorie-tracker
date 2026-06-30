@@ -76,8 +76,9 @@
 }
 
 .mode-toggle {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 5px;
   margin-bottom: 14px;
 }
 
@@ -1627,4 +1628,134 @@
   font-size: 0.88rem;
   color: var(--text-muted);
   line-height: 1.4;
+}
+
+/* ── Label scan ── */
+.scanned-result {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scanned-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scanned-emoji {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.scanned-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.scanned-serving {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.label-saved-msg {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--success);
+  padding: 10px 0;
+}
+
+.label-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.label-actions .edit-cancel-btn,
+.label-actions .edit-save-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* ── My Foods ── */
+.myfoods-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 20px 0;
+  line-height: 1.6;
+}
+
+.myfoods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.myfoods-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.myfoods-row:active {
+  border-color: var(--primary);
+}
+
+.myfoods-emoji {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.myfoods-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.myfoods-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.myfoods-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.myfoods-log-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.serving-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.serving-calc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
 }
