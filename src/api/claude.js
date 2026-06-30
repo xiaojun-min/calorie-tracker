@@ -18,7 +18,8 @@ export async function scanLabel({ imageBase64, imageMimeType, apiKey }) {
   "fiber": <dietary fiber grams per serving, number or 0>,
   "sugar": <total sugar grams per serving, number or 0>,
   "sodium": <sodium milligrams per serving, number or 0>,
-  "saturated_fat": <saturated fat grams per serving, number or 0>
+  "saturated_fat": <saturated fat grams per serving, number or 0>,
+  "health_rating": <integer 1-10 where 10 is most healthy>
 }`,
     },
   ];

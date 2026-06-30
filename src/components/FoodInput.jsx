@@ -206,7 +206,7 @@ export default function FoodInput({ onAdd, loading }) {
         sugar:         Math.round((selectedFood.sugar         || 0) * mult),
         sodium:        Math.round((selectedFood.sodium        || 0) * mult),
         saturated_fat: Math.round((selectedFood.saturated_fat || 0) * mult),
-        health_rating: null,
+        health_rating: selectedFood.health_rating ?? null,
       },
     });
     setSelectedFood(null);
