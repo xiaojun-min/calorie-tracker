@@ -92,7 +92,27 @@ export default function App() {
     } catch { return null; }
   }, [profileVersion]);
 
-  const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail, portionText = "" }) => {
+  const handleAdd = useCallback(async ({ description, imageBase64, imageMimeType, imageThumbnail, portionText = "", manualNutrition }) => {
+    if (manualNutrition) {
+      setEntries((prev) => [{
+        id: Date.now(),
+        date: getToday(),
+        time: getTime(),
+        name: manualNutrition.name,
+        emoji: manualNutrition.emoji || "🍽️",
+        calories: Math.round(manualNutrition.calories || 0),
+        protein: Math.round(manualNutrition.protein || 0),
+        carbs: Math.round(manualNutrition.carbs || 0),
+        fat: Math.round(manualNutrition.fat || 0),
+        fiber: Math.round(manualNutrition.fiber || 0),
+        sugar: Math.round(manualNutrition.sugar || 0),
+        sodium: Math.round(manualNutrition.sodium || 0),
+        saturated_fat: Math.round(manualNutrition.saturated_fat || 0),
+        health_rating: null,
+        imagePreview: null,
+      }, ...prev]);
+      return;
+    }
     const apiKey = localStorage.getItem("anthropic_api_key") || import.meta.env.ANTHROPIC_API_KEY || "";
     if (!description?.trim() && !imageBase64) {
       setError("Please describe your food or upload a photo.");
@@ -132,25 +152,22 @@ export default function App() {
     setEntries((prev) => prev.filter((e) => e.id !== id));
   }
 
-  function handleEdit(id, { date, multiplier, name }) {
+  function handleEdit(id, { date, name, calories, protein, carbs, fat, fiber, sugar, sodium, saturated_fat }) {
     setEntries((prev) =>
       prev.map((e) => {
         if (e.id !== id) return e;
-        const scale = (v) => Math.round((v || 0) * multiplier);
         return {
           ...e,
-          date,
+          date: date || e.date,
           name: name || e.name,
-          ...(multiplier !== 1 && {
-            calories: scale(e.calories),
-            protein: scale(e.protein),
-            carbs: scale(e.carbs),
-            fat: scale(e.fat),
-            fiber: scale(e.fiber),
-            sugar: scale(e.sugar),
-            sodium: scale(e.sodium),
-            saturated_fat: scale(e.saturated_fat),
-          }),
+          calories: Math.round(calories ?? e.calories),
+          protein: Math.round(protein ?? e.protein),
+          carbs: Math.round(carbs ?? e.carbs),
+          fat: Math.round(fat ?? e.fat),
+          fiber: Math.round(fiber ?? e.fiber ?? 0),
+          sugar: Math.round(sugar ?? e.sugar ?? 0),
+          sodium: Math.round(sodium ?? e.sodium ?? 0),
+          saturated_fat: Math.round(saturated_fat ?? e.saturated_fat ?? 0),
         };
       })
     );

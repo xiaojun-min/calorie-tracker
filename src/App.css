@@ -1539,6 +1539,58 @@
   border-color: var(--primary);
 }
 
+.manual-nutrition-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.manual-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.manual-field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.manual-field-input-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 0 8px 0 10px;
+}
+
+.manual-field-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  padding: 8px 0;
+}
+
+.manual-field-input:focus {
+  outline: none;
+}
+
+.manual-field-unit {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .backup-row {
   display: flex;
   gap: 10px;

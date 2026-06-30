@@ -93,6 +93,19 @@ async function fileToJpegBase64(file) {
   return { b64, preview: out };
 }
 
+const MANUAL_FIELDS = [
+  { key: "calories",     label: "Calories",  unit: "kcal" },
+  { key: "protein",      label: "Protein",   unit: "g" },
+  { key: "carbs",        label: "Carbs",     unit: "g" },
+  { key: "fat",          label: "Fat",       unit: "g" },
+  { key: "fiber",        label: "Fiber",     unit: "g" },
+  { key: "sugar",        label: "Sugar",     unit: "g" },
+  { key: "sodium",       label: "Sodium",    unit: "mg" },
+  { key: "saturated_fat",label: "Sat. Fat",  unit: "g" },
+];
+
+const EMPTY_MANUAL = Object.fromEntries(MANUAL_FIELDS.map(f => [f.key, ""]));
+
 export default function FoodInput({ onAdd, loading }) {
   const [mode, setMode] = useState("text");
   const [description, setDescription] = useState("");
@@ -100,6 +113,8 @@ export default function FoodInput({ onAdd, loading }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [photoError, setPhotoError] = useState("");
   const [portionText, setPortionText] = useState("");
+  const [manualName, setManualName] = useState("");
+  const [manualVals, setManualVals] = useState(EMPTY_MANUAL);
   const fileRef = useRef(null);
 
   async function handleFile(e) {
@@ -121,6 +136,26 @@ export default function FoodInput({ onAdd, loading }) {
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (mode === "manual") {
+      onAdd({
+        manualNutrition: {
+          name: manualName.trim() || "Food",
+          emoji: "🍽️",
+          calories: parseFloat(manualVals.calories) || 0,
+          protein: parseFloat(manualVals.protein) || 0,
+          carbs: parseFloat(manualVals.carbs) || 0,
+          fat: parseFloat(manualVals.fat) || 0,
+          fiber: parseFloat(manualVals.fiber) || 0,
+          sugar: parseFloat(manualVals.sugar) || 0,
+          sodium: parseFloat(manualVals.sodium) || 0,
+          saturated_fat: parseFloat(manualVals.saturated_fat) || 0,
+          health_rating: null,
+        },
+      });
+      setManualName("");
+      setManualVals(EMPTY_MANUAL);
+      return;
+    }
     onAdd({
       description,
       imageBase64,
@@ -143,18 +178,20 @@ export default function FoodInput({ onAdd, loading }) {
     if (fileRef.current) fileRef.current.value = "";
   }
 
-  const canSubmit = mode === "text" ? description.trim() : imageBase64;
+  const canSubmit = mode === "manual"
+    ? manualName.trim() && (parseFloat(manualVals.calories) > 0)
+    : mode === "text" ? description.trim() : imageBase64;
 
   return (
     <div className="food-input-card">
-      {/* Text / Photo toggle */}
+      {/* Text / Photo / Manual toggle */}
       <div className="mode-toggle">
         <button
           type="button"
           className={`mode-btn ${mode === "text" ? "active" : ""}`}
           onClick={() => setMode("text")}
         >
-          ✏️ Type food
+          ✏️ Describe
         </button>
         <button
           type="button"
@@ -162,6 +199,13 @@ export default function FoodInput({ onAdd, loading }) {
           onClick={() => setMode("photo")}
         >
           📷 Photo
+        </button>
+        <button
+          type="button"
+          className={`mode-btn ${mode === "manual" ? "active" : ""}`}
+          onClick={() => setMode("manual")}
+        >
+          🔢 Manual
         </button>
       </div>
 
@@ -174,6 +218,35 @@ export default function FoodInput({ onAdd, loading }) {
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
           />
+        ) : mode === "manual" ? (
+          <>
+            <input
+              type="text"
+              className="food-textarea"
+              style={{ resize: "none", padding: "12px 14px" }}
+              placeholder="Food name (e.g. Chicken salad)"
+              value={manualName}
+              onChange={(e) => setManualName(e.target.value)}
+            />
+            <div className="manual-nutrition-grid">
+              {MANUAL_FIELDS.map(({ key, label, unit }) => (
+                <div key={key} className="manual-field">
+                  <label className="manual-field-label">{label}</label>
+                  <div className="manual-field-input-row">
+                    <input
+                      type="number"
+                      className="manual-field-input"
+                      min="0"
+                      placeholder="0"
+                      value={manualVals[key]}
+                      onChange={(e) => setManualVals(prev => ({ ...prev, [key]: e.target.value }))}
+                    />
+                    <span className="manual-field-unit">{unit}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <>
             <div className="photo-area">
@@ -220,8 +293,8 @@ export default function FoodInput({ onAdd, loading }) {
           </>
         )}
 
-        {/* Portion free-text input — shown once there's content to submit */}
-        {canSubmit && (
+        {/* Portion field for text/photo modes */}
+        {mode !== "manual" && canSubmit && (
           <div className="portion-selector">
             <span className="portion-label">Portion eaten (optional)</span>
             <input
@@ -235,7 +308,7 @@ export default function FoodInput({ onAdd, loading }) {
         )}
 
         <button type="submit" className="analyze-btn" disabled={!canSubmit || loading}>
-          {loading ? "⏳ Analyzing..." : "✨ Analyze"}
+          {loading ? "⏳ Analyzing..." : mode === "manual" ? "➕ Add Entry" : "✨ Analyze"}
         </button>
       </form>
     </div>
