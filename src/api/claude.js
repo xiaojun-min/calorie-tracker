@@ -56,66 +56,20 @@ function parseFraction(text) {
   return words[t] ?? null;
 }
 
-export async function analyzeFood({ description, imageBase64, imageMimeType, apiKey, portionText }) {
-  const content = [];
+const NUTRITION_KEYS = ["calories", "protein", "carbs", "fat", "fiber", "sugar", "sodium", "saturated_fat"];
 
-  if (imageBase64) {
-    content.push({
-      type: "image",
-      source: {
-        type: "base64",
-        media_type: imageMimeType || "image/jpeg",
-        data: imageBase64,
-      },
-    });
+function scaleResult(result, fraction, portionText) {
+  const scaled = { ...result };
+  for (const key of NUTRITION_KEYS) {
+    scaled[key] = Math.round((result[key] || 0) * fraction);
   }
+  // Append portion to name so it's clear in the log
+  scaled.name = `${result.name} (${portionText})`.slice(0, 40);
+  return scaled;
+}
 
-  const fraction = parseFraction(portionText);
-  const pct = fraction !== null ? `${Math.round(fraction * 1000) / 10}%` : null;
-
-  let basePrompt;
-  if (description) {
-    basePrompt = portionText
-      ? fraction !== null
-        ? `Estimate the nutrition for a WHOLE "${description}". Then multiply every value by ${fraction.toFixed(6)} because I ate ${portionText} (${pct}) of it. Return only the scaled values for my portion.`
-        : `I ate ${portionText} of "${description}". Estimate nutrition for exactly this portion only, not the whole item.`
-      : `I ate this: "${description}". Estimate the nutritional content for exactly the amount and portion described.`;
-  } else {
-    basePrompt = portionText
-      ? fraction !== null
-        ? `Estimate the nutrition for the WHOLE food in the image. Then multiply every value by ${fraction.toFixed(6)} because I ate ${portionText} (${pct}) of it. Return only the scaled values for my portion.`
-        : `I ate ${portionText} of what is shown in the image. Estimate nutrition for exactly this portion only, not the whole item.`
-      : "I ate what is shown in this image. Estimate the nutritional content for exactly the portion visible.";
-  }
-
-  content.push({
-    type: "text",
-    text: `${basePrompt}
-
-Reply ONLY with a JSON object in this exact format (no markdown, no explanation):
-{
-  "name": "food name (short, max 40 chars)",
-  "emoji": "single relevant food emoji",
-  "calories": <number>,
-  "protein": <number in grams>,
-  "carbs": <number in grams>,
-  "fat": <number in grams>,
-  "fiber": <number in grams>,
-  "sugar": <number in grams>,
-  "sodium": <number in milligrams>,
-  "saturated_fat": <number in grams>,
-  "health_rating": <integer 1-10 where 10 is most healthy>
-}`,
-  });
-
-  console.log("[API] Prompt:", basePrompt);
-  console.log("[API] Calling proxy:", {
-    hasImage: !!imageBase64,
-    base64Chars: imageBase64?.length,
-    hasDescription: !!description,
-    portionText: portionText || "(none)",
-  });
-
+async function callApi({ content, apiKey }) {
+  console.log("[API] Calling proxy");
   let response;
   try {
     response = await fetch("/api/analyze", {
@@ -124,7 +78,7 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
       body: JSON.stringify({ content, apiKey }),
     });
   } catch (networkErr) {
-    console.error("[API] fetch /api/analyze threw:", networkErr.name, networkErr.message);
+    console.error("[API] fetch threw:", networkErr.name, networkErr.message);
     throw new Error(`Network error: ${networkErr.message}`);
   }
 
@@ -145,11 +99,64 @@ Reply ONLY with a JSON object in this exact format (no markdown, no explanation)
     console.error("[API] No JSON in response:", text);
     throw new Error(`Could not parse response: "${text.slice(0, 120)}"`);
   }
-
   try {
     return JSON.parse(jsonMatch[0]);
   } catch (parseErr) {
     console.error("[API] JSON.parse failed:", parseErr.message);
     throw new Error(`Invalid JSON in response: ${parseErr.message}`);
   }
+}
+
+function buildContent({ description, imageBase64, imageMimeType, prompt }) {
+  const content = [];
+  if (imageBase64) {
+    content.push({ type: "image", source: { type: "base64", media_type: imageMimeType || "image/jpeg", data: imageBase64 } });
+  }
+  content.push({
+    type: "text",
+    text: `${prompt}
+
+Reply ONLY with a JSON object in this exact format (no markdown, no explanation):
+{
+  "name": "food name (short, max 40 chars)",
+  "emoji": "single relevant food emoji",
+  "calories": <number>,
+  "protein": <number in grams>,
+  "carbs": <number in grams>,
+  "fat": <number in grams>,
+  "fiber": <number in grams>,
+  "sugar": <number in grams>,
+  "sodium": <number in milligrams>,
+  "saturated_fat": <number in grams>,
+  "health_rating": <integer 1-10 where 10 is most healthy>
+}`,
+  });
+  return content;
+}
+
+export async function analyzeFood({ description, imageBase64, imageMimeType, apiKey, portionText }) {
+  const fraction = parseFraction(portionText);
+
+  // When portionText is a parseable fraction, get the whole-item nutrition first
+  // then scale in JS — guarantees 1/8 and 0.125 always produce identical results.
+  if (fraction !== null) {
+    const wholePrompt = description
+      ? `Estimate the nutrition for a WHOLE "${description}" (the entire thing, not a portion).`
+      : "Estimate the nutrition for the WHOLE food shown in this image (the entire thing, not a portion).";
+    console.log("[API] Prompt (whole item):", wholePrompt);
+    const wholeResult = await callApi({ content: buildContent({ description, imageBase64, imageMimeType, prompt: wholePrompt }), apiKey });
+    return scaleResult(wholeResult, fraction, portionText);
+  }
+
+  // Non-numeric portion (e.g. "a large handful") — ask Claude to estimate directly
+  const prompt = portionText
+    ? description
+      ? `I ate ${portionText} of "${description}". Estimate nutrition for exactly this portion.`
+      : `I ate ${portionText} of what is shown in the image. Estimate nutrition for exactly this portion.`
+    : description
+      ? `I ate this: "${description}". Estimate the nutritional content for exactly the amount described.`
+      : "I ate what is shown in this image. Estimate the nutritional content for the portion visible.";
+
+  console.log("[API] Prompt:", prompt);
+  return callApi({ content: buildContent({ description, imageBase64, imageMimeType, prompt }), apiKey });
 }
